@@ -3,14 +3,14 @@ package com.gestion.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "cliente")
-public class Cliente {
+@Table(name = "proveedor")
+public class Proveedor {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     @Column
-    private String dni;
+    private String cuit;
     @Column
     private String nombre;
     @Column
@@ -22,29 +22,26 @@ public class Cliente {
     @Column
     private String telefono;
     @Column
-    private int nroReparto;
-    @Column
     private boolean activo;
 
-    public Cliente(){}
+    public Proveedor(){}
 
-    public Cliente(String dni, String nombre, String nombreFantasia, String email, String direccion, String telefono, int nroReparto) {
-        this.dni = dni;
+    public Proveedor(String cuit, String nombre, String nombreFantasia, String email, String direccion, String telefono) {
+        this.cuit = cuit;
         this.nombre = nombre;
         this.nombreFantasia = nombreFantasia;
         this.email = email;
         this.direccion = direccion;
         this.telefono = telefono;
-        this.nroReparto = nroReparto;
         this.activo = true;
     }
 
-    public String getDni() {
-        return dni;
+    public String getCuit() {
+        return cuit;
     }
 
-    public void setDni(String dni) {
-        this.dni = dni;
+    public void setCuit(String cuit) {
+        this.cuit = cuit;
     }
 
     public String getNombre() {
@@ -95,14 +92,6 @@ public class Cliente {
         this.telefono = telefono;
     }
 
-    public int getNroReparto() {
-        return nroReparto;
-    }
-
-    public void setNroReparto(int nroReparto) {
-        this.nroReparto = nroReparto;
-    }
-
     public boolean isActivo() {
         return activo;
     }
@@ -115,13 +104,13 @@ public class Cliente {
     public String toString() {
         return "Cliente{" +
                 "id=" + id +
-                ", dni='" + dni + '\'' +
+                ", cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", nombreFantasia='" + nombreFantasia + '\'' +
                 ", email='" + email + '\'' +
                 ", direccion='" + direccion + '\'' +
                 ", telefono='" + telefono + '\'' +
-                ", nroReparto=" + nroReparto +
                 '}';
     }
 }
+
