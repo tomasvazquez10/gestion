@@ -30,14 +30,15 @@ public class CuentaController {
         return new ResponseEntity<>(optionalCuenta.get(), HttpStatus.OK);
     }
 
-    @RequestMapping("/usuario/{id}")
+    @RequestMapping("/usuario/{idUsuario}")
     public ResponseEntity<Cuenta> getCuentaByUsuario(@PathVariable Long idUsuario) {
 
         Optional<Cuenta> optionalCuenta = Optional.ofNullable(repository.findCuentaByIdUsuario(idUsuario));
-        return new ResponseEntity<>(optionalCuenta.get(), HttpStatus.OK);
+        Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
+        return new ResponseEntity<>(cuenta, HttpStatus.OK);
     }
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<Cuenta> crearCuenta(@RequestBody Cuenta cuenta) {
         try {
             Cuenta nuevaCuenta = repository.save(new Cuenta(cuenta.getIdUsuario()));

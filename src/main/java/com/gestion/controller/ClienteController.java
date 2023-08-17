@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/cliente")
 public class ClienteController {
 
     private final ClienteRepository repository;
@@ -26,14 +26,14 @@ public class ClienteController {
     }
 
 
-    @RequestMapping("/cliente/{id}")
+    @RequestMapping("/{id}")
     public ResponseEntity<Cliente> getCliente(@PathVariable Long id) {
 
         Optional<Cliente> optCliente = repository.findById(id);
         return new ResponseEntity<>(optCliente.get(),HttpStatus.OK);
     }
 
-    @PostMapping("/cliente")
+    @PostMapping()
     public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
         try {
             Cliente nuevoCliente = repository
@@ -51,7 +51,7 @@ public class ClienteController {
         }
     }
 
-    @RequestMapping("/clientes")
+    @RequestMapping("/all")
     public ResponseEntity<List<Cliente>> getClientes(){
         try {
             List<Cliente> clientes = new ArrayList<>();
@@ -70,7 +70,7 @@ public class ClienteController {
         }
     }
 
-    @PutMapping("/cliente/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Cliente> updateCliente(@RequestBody Cliente newCliente, @PathVariable Long id){
 
         return repository.findById(id)

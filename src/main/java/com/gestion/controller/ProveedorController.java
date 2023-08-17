@@ -33,7 +33,7 @@ public class ProveedorController {
         return new ResponseEntity<>(optionalProveedor.get(), HttpStatus.OK);
     }
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<Proveedor> crearProveedor(@RequestBody Proveedor proveedor) {
         try {
             Proveedor nuevoProveedor = repository
