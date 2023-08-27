@@ -1,6 +1,7 @@
 package com.gestion.controller;
 
 import com.gestion.model.Cliente;
+import com.gestion.model.Proveedor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +72,7 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> updateCliente(@RequestBody Cliente newCliente, @PathVariable Long id){
+    public ResponseEntity<Cliente> updateCliente(@PathVariable("id") Long id, @RequestBody Cliente newCliente){
 
         return repository.findById(id)
                 .map(cliente -> {
@@ -84,7 +85,7 @@ public class ClienteController {
                     cliente.setDni(newCliente.getDni());
                     return new ResponseEntity<>(repository.save(cliente), HttpStatus.CREATED);
                 })
-                .orElseGet(() -> new ResponseEntity<>(repository.save(newCliente), HttpStatus.CREATED));
+                .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     @RequestMapping("delete/{id}")
@@ -97,5 +98,21 @@ public class ClienteController {
                     return new ResponseEntity(HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping("/edit")
+    public ResponseEntity<Cliente> editCliente(@RequestBody Cliente newCliente) {
+        return repository.findById(newCliente.getId())
+                .map(proveedor -> {
+                    proveedor.setNombre(newCliente.getNombre());
+                    proveedor.setNombreFantasia(newCliente.getNombreFantasia());
+                    proveedor.setDireccion(newCliente.getDireccion());
+                    proveedor.setEmail(newCliente.getEmail());
+                    proveedor.setTelefono(newCliente.getTelefono());
+                    proveedor.setDni(newCliente.getDni());
+                    proveedor.setNroReparto(newCliente.getNroReparto());
+                    return new ResponseEntity<>(repository.save(proveedor), HttpStatus.OK);
+                })
+                .orElseGet(() -> new ResponseEntity<>(repository.save(newCliente), HttpStatus.CREATED));
     }
 }

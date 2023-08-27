@@ -3,6 +3,7 @@ package com.gestion.controller;
 import com.gestion.model.Proveedor;
 import com.gestion.repository.ProveedorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -67,7 +68,7 @@ public class ProveedorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Proveedor> updateProveedor(@RequestBody Proveedor newProveedor, @PathVariable Long id){
+    public ResponseEntity<Proveedor> updateProveedor(@PathVariable Long id, @RequestBody Proveedor newProveedor){
 
         return repository.findById(id)
                 .map(proveedor -> {
@@ -92,5 +93,20 @@ public class ProveedorController {
                     return new ResponseEntity(HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping("/edit")
+    public ResponseEntity<Proveedor> editProveedor(@RequestBody Proveedor newProveedor) {
+        return repository.findById(newProveedor.getId())
+                .map(proveedor -> {
+                    proveedor.setNombre(newProveedor.getNombre());
+                    proveedor.setNombreFantasia(newProveedor.getNombreFantasia());
+                    proveedor.setDireccion(newProveedor.getDireccion());
+                    proveedor.setEmail(newProveedor.getEmail());
+                    proveedor.setTelefono(newProveedor.getTelefono());
+                    proveedor.setCuit(newProveedor.getCuit());
+                    return new ResponseEntity<>(repository.save(proveedor), HttpStatus.OK);
+                })
+                .orElseGet(() -> new ResponseEntity<>(repository.save(newProveedor), HttpStatus.CREATED));
     }
 }
