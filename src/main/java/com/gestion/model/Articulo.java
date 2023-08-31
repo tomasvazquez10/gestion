@@ -16,6 +16,8 @@ public class Articulo {
     @Column
     private String cuitProveedor;
     @Column
+    private int stock;
+    @Column
     private boolean activo;
 
     public Articulo(String nombre, String descripcion, String cuitProveedor) {
@@ -23,6 +25,7 @@ public class Articulo {
         this.descripcion = descripcion;
         this.cuitProveedor = cuitProveedor;
         activo = true;
+        stock = 0;
     }
 
     public Articulo() {
@@ -58,6 +61,14 @@ public class Articulo {
 
     public void setCuitProveedor(String cuitProveedor) {
         this.cuitProveedor = cuitProveedor;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 
     public boolean isActivo() {

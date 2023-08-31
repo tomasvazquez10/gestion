@@ -83,6 +83,7 @@ public class ArticuloController {
                     articulo.setNombre(newArticulo.getNombre());
                     articulo.setDescripcion(newArticulo.getDescripcion());
                     articulo.setCuitProveedor(newArticulo.getCuitProveedor());
+                    articulo.setStock(newArticulo.getStock());
                     return new ResponseEntity<>(repository.save(articulo), HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newArticulo), HttpStatus.CREATED));
