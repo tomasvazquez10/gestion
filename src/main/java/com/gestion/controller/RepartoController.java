@@ -83,5 +83,16 @@ public class RepartoController {
                 })
                 .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
     }
+
+    @PostMapping("/edit")
+    public ResponseEntity<Reparto> editReparto(@RequestBody Reparto newReparto) {
+        return repository.findById(newReparto.getId())
+                .map(reparto -> {
+                    reparto.setNroReparto(newReparto.getNroReparto());
+                    reparto.setDiaSemana(newReparto.getDiaSemana());
+                    return new ResponseEntity<>(repository.save(reparto), HttpStatus.OK);
+                })
+                .orElseGet(() -> new ResponseEntity<>(repository.save(newReparto), HttpStatus.CREATED));
+    }
 }
 
