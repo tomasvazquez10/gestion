@@ -42,14 +42,19 @@ public class PedidoController {
     @PostMapping()
     public ResponseEntity<Pedido> crearPedido(@RequestBody Pedido pedido) {
         try {
+
+            if(pedido.getFecha() == null || pedido.getDniCliente() == null || pedido.getDniCliente().equals("")){
+                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            }
+
             Pedido nuevoPedido = repository
-                .save(new Pedido(pedido.getFecha(),pedido.getEstado(),pedido.getProductos()));
+                .save(new Pedido(pedido.getFecha(),pedido.getEstado(),pedido.getDniCliente(),pedido.getProductos()));
 
             Set<Producto> nuevosProductos = new HashSet<>();
             for (Producto producto: pedido.getProductos()) {
-                nuevosProductos.add(productoRepository.save(new Producto(producto.getIdArticulo(),producto.getCantidad(),producto.getPrecio())));
+                nuevosProductos.add(productoRepository.save(new Producto(producto.getIdArticulo(),producto.getCantidad(),producto.getPrecio(),nuevoPedido)));
             }
-
+            nuevoPedido.setProductos(nuevosProductos);
 
             return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
         } catch (Exception e) {

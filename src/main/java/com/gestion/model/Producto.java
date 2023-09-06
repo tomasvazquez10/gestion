@@ -1,5 +1,8 @@
 package com.gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 
 @Entity
@@ -16,14 +19,16 @@ public class Producto {
     @Column
     private Double precio;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 
-    public Producto(Long idArticulo, int cantidad, Double precio) {
+    public Producto(Long idArticulo, int cantidad, Double precio, Pedido pedido) {
         this.idArticulo = idArticulo;
         this.cantidad = cantidad;
         this.precio = precio;
+        this.pedido = pedido;
     }
 
     public Producto() {

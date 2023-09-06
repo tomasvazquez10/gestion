@@ -1,5 +1,7 @@
 package com.gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
@@ -15,14 +17,18 @@ public class Pedido {
     private Date fecha;
     @Column
     private int estado;
+    @Column()
+    private String dniCliente;
 
-    @OneToMany(mappedBy = "pedido")
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "pedido")
     private Set<Producto> productos;
 
-    public Pedido(Date fecha, int estado, Set<Producto> productos) {
+    public Pedido(Date fecha, int estado, String dniCliente, Set<Producto> productos) {
         this.fecha = fecha;
         this.estado = estado;
         this.productos = productos;
+        this.dniCliente = dniCliente;
     }
 
     public Pedido() {
@@ -58,5 +64,13 @@ public class Pedido {
 
     public void setProductos(Set<Producto> productos) {
         this.productos = productos;
+    }
+
+    public String getDniCliente() {
+        return dniCliente;
+    }
+
+    public void setDniCliente(String dniCliente) {
+        this.dniCliente = dniCliente;
     }
 }
