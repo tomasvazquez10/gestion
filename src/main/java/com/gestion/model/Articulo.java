@@ -19,6 +19,8 @@ public class Articulo {
     private int stock;
     @Column
     private boolean activo;
+    @Column
+    private Long nroArticulo;
 
     public Articulo(String nombre, String descripcion, String cuitProveedor) {
         this.nombre = nombre;
@@ -29,6 +31,14 @@ public class Articulo {
     }
 
     public Articulo() {
+    }
+
+    public Long getNroArticulo() {
+        return nroArticulo;
+    }
+
+    public void setNroArticulo(Long nroArticulo) {
+        this.nroArticulo = nroArticulo;
     }
 
     public Long getId() {

@@ -66,13 +66,13 @@ public class PrecioArticuloController {
     @RequestMapping("/articulo/{idArticulo}")
     public ResponseEntity<PrecioArticulo> getPrecioArticuloByIdArticuloAndDate(@PathVariable Long idArticulo){
         try {
-            PrecioArticulo precioArticulo = repository.getPrecioArticuloByIdArticuloOrderByFechaDesc(idArticulo);
+            List<PrecioArticulo> precioArticulo = repository.getPrecioArticuloByIdArticuloOrderByFechaDesc(idArticulo);
 
             if (precioArticulo == null) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
-            return new ResponseEntity<>(precioArticulo, HttpStatus.OK);
+            return new ResponseEntity<>(precioArticulo.get(0), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

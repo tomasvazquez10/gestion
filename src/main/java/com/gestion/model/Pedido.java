@@ -17,8 +17,10 @@ public class Pedido {
     private Date fecha;
     @Column
     private int estado;
-    @Column()
+    @Column
     private String dniCliente;
+    @Column
+    private Double precioTotal;
 
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "pedido")
@@ -72,5 +74,13 @@ public class Pedido {
 
     public void setDniCliente(String dniCliente) {
         this.dniCliente = dniCliente;
+    }
+
+    public Double getPrecioTotal() {
+        return precioTotal;
+    }
+
+    public void setPrecioTotal(Double precioTotal) {
+        this.precioTotal = precioTotal;
     }
 }
