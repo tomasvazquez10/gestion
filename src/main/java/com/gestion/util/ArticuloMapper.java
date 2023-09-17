@@ -14,6 +14,7 @@ public class ArticuloMapper {
         articuloDTO.setCuitProveedor(articulo.getCuitProveedor());
         articuloDTO.setStock(articulo.getStock());
         articuloDTO.setPrecio(precioArticulo.getPrecio());
+        articuloDTO.setNroArticulo(articulo.getNroArticulo());
 
         return articuloDTO;
     }

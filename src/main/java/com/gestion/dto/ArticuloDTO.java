@@ -6,6 +6,7 @@ public class ArticuloDTO {
 
     private Long id;
     private String nombre;
+    private Long nroArticulo;
     private String descripcion;
     private String cuitProveedor;
     private int stock;
@@ -14,9 +15,10 @@ public class ArticuloDTO {
     public ArticuloDTO() {
     }
 
-    public ArticuloDTO(Long id, String nombre, String descripcion, String cuitProveedor, int stock, Double precio) {
+    public ArticuloDTO(Long id, String nombre, Long nroArticulo, String descripcion, String cuitProveedor, int stock, Double precio) {
         this.id = id;
         this.nombre = nombre;
+        this.nroArticulo = nroArticulo;
         this.descripcion = descripcion;
         this.cuitProveedor = cuitProveedor;
         this.stock = stock;
@@ -33,6 +35,14 @@ public class ArticuloDTO {
 
     public String getNombre() {
         return nombre;
+    }
+
+    public Long getNroArticulo() {
+        return nroArticulo;
+    }
+
+    public void setNroArticulo(Long nroArticulo) {
+        this.nroArticulo = nroArticulo;
     }
 
     public void setNombre(String nombre) {
