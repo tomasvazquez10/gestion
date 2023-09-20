@@ -68,7 +68,7 @@ public class ArticuloController {
             }
             List<ArticuloDTO> articuloDTOS = new ArrayList<>();
             for (Articulo articulo: articulos) {
-                articuloDTOS.add(ArticuloMapper.getArticuloDTO(articulo,getPrecioArticuloByNroArticulo(articulo.getNroArticulo())));
+                articuloDTOS.add(ArticuloMapper.getArticuloDTO(articulo,getPrecioArticuloByNroArticulo(articulo.getId())));
             }
             return new ResponseEntity<>(articuloDTOS, HttpStatus.OK);
         } catch (Exception e) {

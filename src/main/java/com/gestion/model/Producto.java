@@ -1,9 +1,6 @@
 package com.gestion.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 
@@ -15,7 +12,7 @@ public class Producto {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     @Column
-    private Long idArticulo;
+    private Long nroArticulo;
     @Column
     private int cantidad;
     @Column
@@ -28,8 +25,8 @@ public class Producto {
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 
-    public Producto(Long idArticulo, int cantidad, Double precio, Pedido pedido) {
-        this.idArticulo = idArticulo;
+    public Producto(Long nroArticulo, int cantidad, Double precio, Pedido pedido) {
+        this.nroArticulo = nroArticulo;
         this.cantidad = cantidad;
         this.precio = precio;
         this.pedido = pedido;
@@ -46,12 +43,12 @@ public class Producto {
         this.id = id;
     }
 
-    public Long getIdArticulo() {
-        return idArticulo;
+    public Long getNroArticulo() {
+        return nroArticulo;
     }
 
-    public void setIdArticulo(Long idArticulo) {
-        this.idArticulo = idArticulo;
+    public void setNroArticulo(Long nroArticulo) {
+        this.nroArticulo = nroArticulo;
     }
 
     public int getCantidad() {

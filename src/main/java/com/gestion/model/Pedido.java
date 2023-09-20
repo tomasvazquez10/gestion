@@ -22,6 +22,8 @@ public class Pedido {
     @Column
     private Double precioTotal;
 
+    private String estadoTexto;
+
     //@JsonManagedReference
     @OneToMany(mappedBy = "pedido")
     private Set<Producto> productos;
@@ -32,6 +34,7 @@ public class Pedido {
         this.dniCliente = dniCliente;
         this.precioTotal = precioTotal;
         this.productos = productos;
+        this.estadoTexto = "PENDIENTE";
     }
 
     public Pedido() {
@@ -83,5 +86,16 @@ public class Pedido {
 
     public void setPrecioTotal(Double precioTotal) {
         this.precioTotal = precioTotal;
+    }
+
+    public void setEstadoTexto(int estado) {
+        switch (estado){
+            case 0:
+                this.estadoTexto = "PENDIENTE";
+            case 1:
+                this.estadoTexto = "ENTREGADO";
+            case 2:
+                this.estadoTexto = "PAGO";
+        }
     }
 }

@@ -39,7 +39,9 @@ public class PedidoController {
 
         Optional<Pedido> optionalPedido = repository.findById(id);
         if (optionalPedido.isPresent()){
-            return new ResponseEntity<>(optionalPedido.get(), HttpStatus.OK);
+            Pedido pedido = optionalPedido.get();
+            pedido.setEstadoTexto(pedido.getEstado());
+            return new ResponseEntity<>(pedido, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(new Pedido(),HttpStatus.NOT_FOUND);
         }
@@ -121,8 +123,8 @@ public class PedidoController {
             Set<Producto> nuevosProductos = new HashSet<>();
             for (Producto producto: pedido.getProductos()) {
                 //resto la cantidad del stock del articulo
-                //restarStock(producto);
-                nuevosProductos.add(productoRepository.save(new Producto(producto.getIdArticulo(),producto.getCantidad(),producto.getPrecio(),nuevoPedido)));
+                restarStock(producto);
+                nuevosProductos.add(productoRepository.save(new Producto(producto.getNroArticulo(),producto.getCantidad(),producto.getPrecio(),nuevoPedido)));
             }
             nuevoPedido.setProductos(nuevosProductos);
 
@@ -134,13 +136,11 @@ public class PedidoController {
 
     private void restarStock(Producto producto) throws Exception {
 
-        Optional<Articulo> optionalArticulo = articuloRepository.findArticuloByNroArticulo(producto.getIdArticulo());
-        if (optionalArticulo.isPresent()){
-            Articulo articulo = optionalArticulo.get();
+        Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
+        if (articuloOptional.isPresent()) {
+            Articulo articulo = articuloOptional.get();
             articulo.setStock(articulo.getStock() - producto.getCantidad());
             articuloRepository.save(articulo);
-        }else {
-            throw new Exception("PedidoController.restarStock() - No existe el articulo seleccionado");
         }
     }
 

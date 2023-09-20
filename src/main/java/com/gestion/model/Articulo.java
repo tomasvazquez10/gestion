@@ -1,10 +1,11 @@
 package com.gestion.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "articulo")
-public class Articulo {
+public class Articulo implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -19,6 +20,7 @@ public class Articulo {
     private int stock;
     @Column
     private boolean activo;
+
     @Column
     private Long nroArticulo;
 
