@@ -1,7 +1,9 @@
 package com.gestion.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 
@@ -19,8 +21,10 @@ public class Producto {
     @Column
     private Double precio;
 
-    @JsonBackReference
-    @ManyToOne
+    //@JsonBackReference
+    @JsonIgnore
+    @ManyToOne()
+    //@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 

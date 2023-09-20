@@ -116,12 +116,12 @@ public class PedidoController {
             }
 
             Pedido nuevoPedido = repository
-                .save(new Pedido(pedido.getFecha(),pedido.getEstado(),pedido.getDniCliente(),pedido.getProductos()));
+                .save(new Pedido(pedido.getFecha(),pedido.getEstado(),pedido.getDniCliente(),pedido.getPrecioTotal(),pedido.getProductos()));
 
             Set<Producto> nuevosProductos = new HashSet<>();
             for (Producto producto: pedido.getProductos()) {
                 //resto la cantidad del stock del articulo
-                restarStock(producto);
+                //restarStock(producto);
                 nuevosProductos.add(productoRepository.save(new Producto(producto.getIdArticulo(),producto.getCantidad(),producto.getPrecio(),nuevoPedido)));
             }
             nuevoPedido.setProductos(nuevosProductos);

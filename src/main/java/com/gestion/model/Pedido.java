@@ -22,15 +22,16 @@ public class Pedido {
     @Column
     private Double precioTotal;
 
-    @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "pedido")
+    //@JsonManagedReference
+    @OneToMany(mappedBy = "pedido")
     private Set<Producto> productos;
 
-    public Pedido(Date fecha, int estado, String dniCliente, Set<Producto> productos) {
+    public Pedido(Date fecha, int estado, String dniCliente, Double precioTotal, Set<Producto> productos) {
         this.fecha = fecha;
         this.estado = estado;
-        this.productos = productos;
         this.dniCliente = dniCliente;
+        this.precioTotal = precioTotal;
+        this.productos = productos;
     }
 
     public Pedido() {
