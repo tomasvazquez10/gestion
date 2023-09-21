@@ -1,4 +1,4 @@
-package com.gestion.util;
+package com.gestion.util.mappers;
 
 import com.gestion.dto.ArticuloDTO;
 import com.gestion.model.Articulo;

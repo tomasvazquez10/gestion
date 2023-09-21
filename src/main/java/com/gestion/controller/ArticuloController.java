@@ -5,7 +5,7 @@ import com.gestion.model.Articulo;
 import com.gestion.model.PrecioArticulo;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.PrecioArticuloRepository;
-import com.gestion.util.ArticuloMapper;
+import com.gestion.util.mappers.ArticuloMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ public class ArticuloController {
     @RequestMapping("/{id}")
     public ResponseEntity<ArticuloDTO> getArticulo(@PathVariable Long id) {
 
-        Optional<Articulo> optionalArticulo = repository.findArticuloByNroArticulo(id);
+        Optional<Articulo> optionalArticulo = repository.findById(id);
         PrecioArticulo precioArticulo = getPrecioArticuloByNroArticulo(id);
         if (optionalArticulo.isPresent()){
             ArticuloDTO articuloDTO = ArticuloMapper.getArticuloDTO(optionalArticulo.get(),precioArticulo);

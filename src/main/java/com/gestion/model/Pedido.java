@@ -88,14 +88,9 @@ public class Pedido {
         this.precioTotal = precioTotal;
     }
 
-    public void setEstadoTexto(int estado) {
-        switch (estado){
-            case 0:
-                this.estadoTexto = "PENDIENTE";
-            case 1:
-                this.estadoTexto = "ENTREGADO";
-            case 2:
-                this.estadoTexto = "PAGO";
-        }
+    public String getEstadoTexto(){ return estadoTexto; }
+
+    public void setEstadoTexto(String estadoTexto) {
+        this.estadoTexto = estadoTexto;
     }
 }

@@ -1,5 +1,7 @@
 package com.gestion.controller;
 
+import com.gestion.dto.PedidoDTO;
+import com.gestion.dto.ProductoDTO;
 import com.gestion.model.Articulo;
 import com.gestion.model.Cliente;
 import com.gestion.model.Pedido;
@@ -8,6 +10,8 @@ import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.ClienteRepository;
 import com.gestion.repository.PedidoRepository;
 import com.gestion.repository.ProductoRepository;
+import com.gestion.util.mappers.PedidoMapper;
+import com.gestion.util.mappers.ProductoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,15 +39,14 @@ public class PedidoController {
     }
 
     @RequestMapping("/{id}")
-    public ResponseEntity<Pedido> getPedido(@PathVariable Long id) {
+    public ResponseEntity<PedidoDTO> getPedido(@PathVariable Long id) {
 
         Optional<Pedido> optionalPedido = repository.findById(id);
         if (optionalPedido.isPresent()){
-            Pedido pedido = optionalPedido.get();
-            pedido.setEstadoTexto(pedido.getEstado());
-            return new ResponseEntity<>(pedido, HttpStatus.OK);
+            PedidoDTO pedidoDTO = PedidoMapper.getPedidoDTO(optionalPedido.get(),getProductosDTO(optionalPedido.get().getProductos()));
+            return new ResponseEntity<>(pedidoDTO, HttpStatus.OK);
         }else{
-            return new ResponseEntity<>(new Pedido(),HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new PedidoDTO(),HttpStatus.NOT_FOUND);
         }
 
     }
@@ -134,7 +137,28 @@ public class PedidoController {
         }
     }
 
-    private void restarStock(Producto producto) throws Exception {
+    @PostMapping("/edit")
+    public ResponseEntity<Pedido> editPedido(@RequestBody Pedido newPedido) {
+        return repository.findById(newPedido.getId())
+                .map(pedido -> {
+                    pedido.setFecha(newPedido.getFecha());
+                    pedido.setEstadoTexto(newPedido.getEstadoTexto());
+                    pedido.setEstado(newPedido.getEstado());
+                    pedido.setDniCliente(newPedido.getDniCliente());
+                    pedido.setPrecioTotal(newPedido.getPrecioTotal());
+                    pedido.setProductos(newPedido.getProductos());
+                    if(newPedido.getEstadoTexto().equals("CANCELADO") && newPedido.getEstado()==0){
+                        for (Producto producto: newPedido.getProductos()) {
+                            sumarStock(producto);
+                        }
+                    }
+
+                    return new ResponseEntity<>(repository.save(pedido), HttpStatus.OK);
+                })
+                .orElseGet(() -> new ResponseEntity<>(repository.save(newPedido), HttpStatus.CREATED));
+    }
+
+    private void restarStock(Producto producto) {
 
         Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
         if (articuloOptional.isPresent()) {
@@ -144,6 +168,22 @@ public class PedidoController {
         }
     }
 
-    
+    private void sumarStock(Producto producto){
+        Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
+        if (articuloOptional.isPresent()) {
+            Articulo articulo = articuloOptional.get();
+            articulo.setStock(articulo.getStock() + producto.getCantidad());
+            articuloRepository.save(articulo);
+        }
+    }
+
+    private Set<ProductoDTO> getProductosDTO(Set<Producto> productos){
+        Set<ProductoDTO> productoDTOS = new HashSet<>();
+        for(Producto producto : productos){
+            Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
+            productoDTOS.add(ProductoMapper.getProductoDTO(articuloOptional.get(),producto));
+        }
+        return productoDTOS;
+    }
     
 }
