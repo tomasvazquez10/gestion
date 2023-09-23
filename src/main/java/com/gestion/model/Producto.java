@@ -18,10 +18,8 @@ public class Producto {
     @Column
     private Double precio;
 
-    //@JsonBackReference
     @JsonIgnore
     @ManyToOne()
-    //@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 

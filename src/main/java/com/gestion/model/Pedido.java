@@ -28,6 +28,15 @@ public class Pedido {
     @OneToMany(mappedBy = "pedido")
     private Set<Producto> productos;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinTable(name = "pedido_venta",
+            joinColumns =
+                    { @JoinColumn(name = "PEDIDO_id", referencedColumnName = "id") },
+            inverseJoinColumns =
+                    { @JoinColumn(name = "VENTA_id", referencedColumnName = "id") })
+    private Venta venta;
+
+
     public Pedido(Date fecha, int estado, String dniCliente, Double precioTotal, Set<Producto> productos) {
         this.fecha = fecha;
         this.estado = estado;
@@ -38,6 +47,14 @@ public class Pedido {
     }
 
     public Pedido() {
+    }
+
+    public Venta getVenta() {
+        return venta;
+    }
+
+    public void setVenta(Venta venta) {
+        this.venta = venta;
     }
 
     public Long getId() {

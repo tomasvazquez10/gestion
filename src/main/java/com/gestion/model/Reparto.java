@@ -14,11 +14,14 @@ public class Reparto {
     @Column
     private String diaSemana;
     @Column
+    private String zonaEntrega;
+    @Column
     private boolean activo;
 
-    public Reparto(int nroReparto, String diaSemana) {
+    public Reparto(int nroReparto, String diaSemana, String zonaEntrega) {
         this.nroReparto = nroReparto;
         this.diaSemana = diaSemana;
+        this.zonaEntrega = zonaEntrega;
         this.activo = true;
     }
 
@@ -54,6 +57,14 @@ public class Reparto {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public String getZonaEntrega() {
+        return zonaEntrega;
+    }
+
+    public void setZonaEntrega(String zonaEntrega) {
+        this.zonaEntrega = zonaEntrega;
     }
 
     @Override

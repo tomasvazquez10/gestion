@@ -4,6 +4,7 @@ import com.gestion.model.Proveedor;
 import com.gestion.model.Reparto;
 import com.gestion.repository.RepartoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,11 +32,25 @@ public class RepartoController {
         return new ResponseEntity<>(optionalReparto.get(), HttpStatus.OK);
     }
 
+    @RequestMapping("/numero/{nroReparto}")
+    public ResponseEntity<List<Reparto>> getRepartoByNroReparto(@PathVariable int nroReparto) {
+
+        List<Reparto> repartos = repository.findAllByNroRepartoOrderByNroReparto(nroReparto).stream()
+        .filter(Reparto::isActivo)
+                .collect(Collectors.toList());;
+
+        if (repartos.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity<>(repartos, HttpStatus.OK);
+    }
+
     @PostMapping()
     public ResponseEntity<Reparto> crearReparto(@RequestBody Reparto reparto) {
         try {
             Reparto nuevoReparto = repository
-                    .save(new Reparto(reparto.getNroReparto(), reparto.getDiaSemana()));
+                    .save(new Reparto(reparto.getNroReparto(), reparto.getDiaSemana(), reparto.getZonaEntrega()));
 
             return new ResponseEntity<>(nuevoReparto, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -46,7 +61,7 @@ public class RepartoController {
     @RequestMapping("/all")
     public ResponseEntity<List<Reparto>> getRepartos(){
         try {
-            List<Reparto> repartos = repository.findAll().stream()
+            List<Reparto> repartos = repository.findAll(Sort.by(Sort.Direction.ASC,"nroReparto")).stream()
                     .filter(Reparto::isActivo)
                     .collect(Collectors.toList());;
 
