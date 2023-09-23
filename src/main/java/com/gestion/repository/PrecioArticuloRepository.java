@@ -9,5 +9,5 @@ public interface PrecioArticuloRepository extends JpaRepository<PrecioArticulo, 
 
     List<PrecioArticulo> getPrecioArticuloByIdArticuloOrderByFechaDesc(Long idArticulo);
 
-    List<PrecioArticulo> getPrecioArticulosByIdArticulo(Long idArticulo);
+    List<PrecioArticulo> getPrecioArticulosByIdArticuloOrderByFechaDesc(Long idArticulo);
 }

@@ -14,9 +14,9 @@ public class Cuenta {
     @Column
     private double saldo;
 
-    public Cuenta(Long idUsuario) {
+    public Cuenta(Long idUsuario, double saldo) {
         this.idUsuario = idUsuario;
-        this.saldo = 0;
+        this.saldo = saldo;
     }
 
     public Cuenta(){}

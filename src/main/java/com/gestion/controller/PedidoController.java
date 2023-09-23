@@ -2,14 +2,8 @@ package com.gestion.controller;
 
 import com.gestion.dto.PedidoDTO;
 import com.gestion.dto.ProductoDTO;
-import com.gestion.model.Articulo;
-import com.gestion.model.Cliente;
-import com.gestion.model.Pedido;
-import com.gestion.model.Producto;
-import com.gestion.repository.ArticuloRepository;
-import com.gestion.repository.ClienteRepository;
-import com.gestion.repository.PedidoRepository;
-import com.gestion.repository.ProductoRepository;
+import com.gestion.model.*;
+import com.gestion.repository.*;
 import com.gestion.util.mappers.PedidoMapper;
 import com.gestion.util.mappers.ProductoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +23,15 @@ public class PedidoController {
     private final ProductoRepository productoRepository;
     private final ClienteRepository clienteRepository;
     private final ArticuloRepository articuloRepository;
+    private final CuentaRepository cuentaRepository;
     
     @Autowired
-    public PedidoController(PedidoRepository repository, ProductoRepository productoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository) {
+    public PedidoController(PedidoRepository repository, ProductoRepository productoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository, CuentaRepository cuentaRepository) {
         this.repository = repository;
         this.productoRepository = productoRepository;
         this.clienteRepository = clienteRepository;
         this.articuloRepository = articuloRepository;
+        this.cuentaRepository = cuentaRepository;
     }
 
     @RequestMapping("/{id}")
@@ -131,9 +127,30 @@ public class PedidoController {
             }
             nuevoPedido.setProductos(nuevosProductos);
 
+            //resto el total de la cuenta
+            Cuenta cuenta = getCuentaByDniCliente(pedido.getDniCliente());
+            if (cuenta.getId() != null){
+                cuenta.setSaldo(cuenta.getSaldo() - pedido.getPrecioTotal());
+            }else{
+                //creo cuenta al cliente
+                crearCuenta(pedido.getDniCliente(), pedido.getPrecioTotal());
+            }
             return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void crearCuenta(String dniCliente, Double precioTotal) {
+
+        try {
+            Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
+            if (optionalCliente.isPresent()){
+                Cuenta nuevaCuenta = cuentaRepository.save(new Cuenta(optionalCliente.get().getId(),-precioTotal));
+            }
+
+        } catch (Exception e) {
+            System.out.println("ERROR");
         }
     }
 
@@ -184,6 +201,16 @@ public class PedidoController {
             productoDTOS.add(ProductoMapper.getProductoDTO(articuloOptional.get(),producto));
         }
         return productoDTOS;
+    }
+
+    private Cuenta getCuentaByDniCliente(String dniCliente){
+        Cuenta cuenta = new Cuenta();
+        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
+        if (optionalCliente.isPresent()){
+            cuenta = cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId());
+        }
+        return cuenta;
+
     }
     
 }

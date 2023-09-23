@@ -1,5 +1,6 @@
 package com.gestion.controller;
 
+import com.gestion.model.Cliente;
 import com.gestion.model.Cuenta;
 import com.gestion.repository.CuentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class CuentaController {
     @PostMapping()
     public ResponseEntity<Cuenta> crearCuenta(@RequestBody Cuenta cuenta) {
         try {
-            Cuenta nuevaCuenta = repository.save(new Cuenta(cuenta.getIdUsuario()));
+            Cuenta nuevaCuenta = repository.save(new Cuenta(cuenta.getIdUsuario(),0));
 
             return new ResponseEntity<>(nuevaCuenta, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -75,6 +76,17 @@ public class CuentaController {
                     cuenta.setSaldo(newCuenta.getSaldo());
 
                     return new ResponseEntity<>(repository.save(cuenta), HttpStatus.CREATED);
+                })
+                .orElseGet(() -> new ResponseEntity<>(repository.save(newCuenta), HttpStatus.CREATED));
+    }
+
+    @PostMapping("/pedido")
+    public ResponseEntity<Cuenta> restarCuenta(@RequestBody Cuenta newCuenta) {
+        return repository.findById(newCuenta.getId())
+                .map(cuenta -> {
+                    cuenta.setSaldo(cuenta.getSaldo() - newCuenta.getSaldo());
+
+                    return new ResponseEntity<>(repository.save(cuenta), HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newCuenta), HttpStatus.CREATED));
     }

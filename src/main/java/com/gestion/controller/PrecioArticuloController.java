@@ -81,7 +81,7 @@ public class PrecioArticuloController {
     @RequestMapping("/historico/{idArticulo}")
     public ResponseEntity<List<PrecioArticulo>> getPrecioArticulosByIdArticulo(@PathVariable Long idArticulo){
         try {
-            List<PrecioArticulo> precioArticulos = repository.getPrecioArticulosByIdArticulo(idArticulo);
+            List<PrecioArticulo> precioArticulos = repository.getPrecioArticulosByIdArticuloOrderByFechaDesc(idArticulo);
 
             if (precioArticulos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
