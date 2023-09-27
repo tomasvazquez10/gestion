@@ -2,6 +2,7 @@ package com.gestion.controller;
 
 import com.gestion.model.Cliente;
 import com.gestion.model.Cuenta;
+import com.gestion.repository.ClienteRepository;
 import com.gestion.repository.CuentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,10 +19,12 @@ import java.util.Optional;
 public class CuentaController {
 
     private final CuentaRepository repository;
+    private final ClienteRepository clienteRepository;
 
     @Autowired
-    public CuentaController(CuentaRepository repository) {
+    public CuentaController(CuentaRepository repository, ClienteRepository clienteRepository) {
         this.repository = repository;
+        this.clienteRepository = clienteRepository;
     }
 
     @RequestMapping("/{id}")
@@ -29,6 +32,20 @@ public class CuentaController {
 
         Optional<Cuenta> optionalCuenta = repository.findById(id);
         return new ResponseEntity<>(optionalCuenta.get(), HttpStatus.OK);
+    }
+
+    @RequestMapping("/cliente/dni/{dni}")
+    public ResponseEntity<Cuenta> getCuentaByDniCliente(@PathVariable String dni) {
+
+        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
+        if(optionalCliente.isPresent()){
+            Optional<Cuenta> optionalCuenta = Optional.ofNullable(repository.findCuentaByIdUsuario(optionalCliente.get().getId()));
+            Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
+            return new ResponseEntity<>(cuenta, HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(new Cuenta(), HttpStatus.OK);
+        }
+
     }
 
     @RequestMapping("/usuario/{idUsuario}")

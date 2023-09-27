@@ -131,6 +131,7 @@ public class PedidoController {
             Cuenta cuenta = getCuentaByDniCliente(pedido.getDniCliente());
             if (cuenta.getId() != null){
                 cuenta.setSaldo(cuenta.getSaldo() - pedido.getPrecioTotal());
+                Cuenta nuevaCuenta = cuentaRepository.save(cuenta);
             }else{
                 //creo cuenta al cliente
                 crearCuenta(pedido.getDniCliente(), pedido.getPrecioTotal());
@@ -203,13 +204,16 @@ public class PedidoController {
         return productoDTOS;
     }
 
-    private Cuenta getCuentaByDniCliente(String dniCliente){
-        Cuenta cuenta = new Cuenta();
-        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
-        if (optionalCliente.isPresent()){
-            cuenta = cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId());
+    public Cuenta getCuentaByDniCliente(String dni) {
+
+        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
+        if(optionalCliente.isPresent()){
+            Optional<Cuenta> optionalCuenta = Optional.ofNullable(cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId()));
+            Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
+            return cuenta;
+        }else{
+            return new Cuenta();
         }
-        return cuenta;
 
     }
     
