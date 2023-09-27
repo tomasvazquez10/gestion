@@ -1,15 +1,17 @@
 package com.gestion.controller;
 
-import com.gestion.model.Pago;
-import com.gestion.repository.PagoRepository;
-import com.gestion.repository.VentaRepository;
+import com.gestion.dto.PagoDTO;
+import com.gestion.model.*;
+import com.gestion.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -18,11 +20,17 @@ public class PagoController {
 
     private final PagoRepository repository;
     private final VentaRepository ventaRepository;
+    private final PedidoRepository pedidoRepository;
+    private final CuentaRepository cuentaRepository;
+    private final ClienteRepository clienteRepository;
 
     @Autowired
-    public PagoController(PagoRepository repository, VentaRepository ventaRepository) {
+    public PagoController(PagoRepository repository, VentaRepository ventaRepository, PedidoRepository pedidoRepository, CuentaRepository cuentaRepository, ClienteRepository clienteRepository) {
         this.repository = repository;
         this.ventaRepository = ventaRepository;
+        this.pedidoRepository = pedidoRepository;
+        this.cuentaRepository = cuentaRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     @RequestMapping("/{id}")
@@ -38,10 +46,40 @@ public class PagoController {
     }
 
     @PostMapping()
-    public ResponseEntity<Pago> crearPago(@RequestBody Pago pago) {
+    public ResponseEntity<Pago> crearPago(@RequestBody PagoDTO pagoDTO) {
         try {
-            Pago nuevoPago = repository
-                    .save(new Pago(pago.getMonto(),pago.getFecha(),pago.getFormaPago(),pago.getDescuento(),pago.getVenta()));
+            Optional<Pedido> optionalPedido = pedidoRepository.findById(pagoDTO.getIdPedido());
+            Pago nuevoPago = new Pago();
+            if (optionalPedido.isPresent()){
+                Venta venta = optionalPedido.get().getVenta();
+                nuevoPago = repository
+                        .save(new Pago(pagoDTO.getMonto(),pagoDTO.getFecha(),pagoDTO.getFormaPago(),pagoDTO.getDescuento(),venta));
+                //sumo el pago a las venta
+                Set<Pago> pagoSets = new HashSet<>();
+                if(venta.getPagos() !=null && !venta.getPagos().isEmpty()){
+                    pagoSets = venta.getPagos();
+                }
+                pagoSets.add(nuevoPago);
+                venta.setPagos(pagoSets);
+                ventaRepository.save(venta);
+
+                //sumo a la cuenta el pago
+                Cuenta cuenta = getCuentaByDniCliente(optionalPedido.get().getDniCliente());
+                cuenta.setSaldo(cuenta.getSaldo() + nuevoPago.getMonto());
+                cuentaRepository.save(cuenta);
+
+                //si la suma de pagos cancela el total del pedido, cambio el estado del pedido
+                double totalPagos = 0;
+                for (Pago pago : pagoSets){
+                    totalPagos += pago.getMonto();
+                }
+                if (optionalPedido.get().getPrecioTotal()-totalPagos == 0){
+                    Pedido nuevoPedido = optionalPedido.get();
+                    nuevoPedido.setEstado(3);
+                    nuevoPedido.setEstadoTexto("PAGO");
+                    pedidoRepository.save(nuevoPedido);
+                }
+            }
 
             return new ResponseEntity<>(nuevoPago, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -62,5 +100,18 @@ public class PagoController {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public Cuenta getCuentaByDniCliente(String dni) {
+
+        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
+        if(optionalCliente.isPresent()){
+            Optional<Cuenta> optionalCuenta = Optional.ofNullable(cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId()));
+            Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
+            return cuenta;
+        }else{
+            return new Cuenta();
+        }
+
     }
 }

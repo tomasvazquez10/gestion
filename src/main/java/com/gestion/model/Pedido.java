@@ -1,5 +1,6 @@
 package com.gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -28,6 +29,7 @@ public class Pedido {
     @OneToMany(mappedBy = "pedido")
     private Set<Producto> productos;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinTable(name = "pedido_venta",
             joinColumns =
