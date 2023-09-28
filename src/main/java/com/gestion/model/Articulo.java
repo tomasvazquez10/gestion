@@ -1,10 +1,13 @@
 package com.gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 @Entity
-@Table(name = "articulo")
+@Table(name = "ARTICULO")
 public class Articulo implements Serializable {
 
     @Id
@@ -20,6 +23,10 @@ public class Articulo implements Serializable {
     private int stock;
     @Column
     private boolean activo;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "articulo")
+    private Set<Compra> compras;
 
     @Column
     private Long nroArticulo;
@@ -89,6 +96,14 @@ public class Articulo implements Serializable {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public Set<Compra> getCompras() {
+        return compras;
+    }
+
+    public void setCompras(Set<Compra> compras) {
+        this.compras = compras;
     }
 
     @Override
