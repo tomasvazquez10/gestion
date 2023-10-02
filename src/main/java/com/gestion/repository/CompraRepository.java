@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface CompraRepository extends JpaRepository<Compra, Long> {
 
-    List<Compra> findAllByArticuloOrderByPrecioUnidadDesc(Articulo articulo);
+    List<Compra> findAllByArticuloOrderByFechaDesc(Articulo articulo);
 }

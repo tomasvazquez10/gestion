@@ -58,6 +58,27 @@ public class CompraController {
         }
     }
 
+    @RequestMapping("/articulo/{idArticulo}")
+    public ResponseEntity<List<Compra>> getComprasByArticuloId(@PathVariable Long idArticulo){
+        try {
+            Optional<Articulo> optionalArticulo = articuloRepository.findById(idArticulo);
+            if (optionalArticulo.isPresent()){
+                List<Compra> compras = repository.findAllByArticuloOrderByFechaDesc(optionalArticulo.get()).stream()
+                        .filter(Compra::isActivo)
+                        .collect(Collectors.toList());;
+
+                if (compras.isEmpty()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                return new ResponseEntity<>(compras, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.NO_CONTENT);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @RequestMapping("delete/{id}")
     public ResponseEntity deleteCompra(@PathVariable Long id){
 
@@ -85,15 +106,16 @@ public class CompraController {
     }
 
     @PostMapping()
-    public ResponseEntity<Compra> crearCompra(@RequestBody CompraDTO compraDTO) {
+    public ResponseEntity<Compra> crearCompra(@RequestBody Compra compra) {
         try {
-            Articulo articulo = ArticuloMapper.getArticulo(compraDTO.getArticulo());
+            Articulo articulo = compra.getArticulo();
             Compra nuevaCompra = repository
-                    .save(new Compra(articulo, compraDTO.getFecha(),compraDTO.getPrecioUnidad(),compraDTO.getCantidad(),true));
+                    .save(new Compra(articulo, compra.getFecha(),compra.getPrecioUnidad(),compra.getCantidad(),true));
 
             //sumo la cantidad al stock de articulo
-            articulo.setStock(articulo.getStock() + compraDTO.getCantidad());
+            articulo.setStock(articulo.getStock() + compra.getCantidad());
             articuloRepository.save(articulo);
+            nuevaCompra.setArticulo(articulo);
 
             return new ResponseEntity<>(nuevaCompra, HttpStatus.CREATED);
         } catch (Exception e) {

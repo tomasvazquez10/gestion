@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,12 +65,33 @@ public class RepartoController {
             List<Reparto> repartos = repository.findAll(Sort.by(Sort.Direction.ASC,"nroReparto")).stream()
                     .filter(Reparto::isActivo)
                     .collect(Collectors.toList());;
-
             if (repartos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
             return new ResponseEntity<>(repartos, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping("/numeros")
+    public ResponseEntity<List<Integer>> getNroRepartos(){
+        try {
+            List<Reparto> repartos = repository.findAll(Sort.by(Sort.Direction.ASC,"nroReparto")).stream()
+                    .filter(Reparto::isActivo)
+                    .collect(Collectors.toList());;
+            List<Integer> nroRepartos = new ArrayList<>();
+            for (Reparto reparto : repartos){
+                if (!nroRepartos.contains(reparto.getNroReparto())){
+                    nroRepartos.add(reparto.getNroReparto());
+                }
+            }
+            if (repartos.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(nroRepartos, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

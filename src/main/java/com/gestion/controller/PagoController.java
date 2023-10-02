@@ -102,7 +102,7 @@ public class PagoController {
         }
     }
 
-    public Cuenta getCuentaByDniCliente(String dni) {
+    private Cuenta getCuentaByDniCliente(String dni) {
 
         Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
         if(optionalCliente.isPresent()){

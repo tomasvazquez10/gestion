@@ -50,7 +50,7 @@ public class VentaController {
                 return new ResponseEntity<>(optionalVenta.get(), HttpStatus.OK);
             }
         }
-        return new ResponseEntity<>(new Venta(),HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new Venta(),HttpStatus.OK);
     }
 
     @PostMapping()
