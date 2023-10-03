@@ -3,6 +3,7 @@ package com.gestion.controller;
 import com.gestion.dto.ArticuloDTO;
 import com.gestion.model.Articulo;
 import com.gestion.model.PrecioArticulo;
+import com.gestion.model.Proveedor;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.PrecioArticuloRepository;
 import com.gestion.util.mappers.ArticuloMapper;
@@ -101,7 +102,25 @@ public class ArticuloController {
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newArticulo), HttpStatus.CREATED));
     }
 
-
+    @RequestMapping("/buscar/{campo}/{value}")
+    public ResponseEntity<List<Articulo>> findArticulosBy(@PathVariable String campo, @PathVariable String value) {
+        try{
+            List<Articulo> articulos = new ArrayList<>();
+            switch (campo){
+                case "nombre":
+                    articulos = repository.findAllByNombreStartingWithIgnoreCaseAndActivoTrue(value);
+                    break;
+                case "cuit":
+                    articulos = repository.findAllByCuitProveedorStartingWithAndActivoTrue(value);
+                    break;
+                default:
+                    articulos = new ArrayList<>();
+            }
+            return new ResponseEntity<>(articulos,HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
+        }
+    }
     private PrecioArticulo getPrecioArticuloByNroArticulo(Long nroArticulo){
         List<PrecioArticulo> precioArticuloList = precioArticuloRepository.getPrecioArticuloByIdArticuloOrderByFechaDesc(nroArticulo);
         if (precioArticuloList.isEmpty()){

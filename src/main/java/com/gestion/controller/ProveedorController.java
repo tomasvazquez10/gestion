@@ -1,5 +1,6 @@
 package com.gestion.controller;
 
+import com.gestion.model.Cliente;
 import com.gestion.model.Proveedor;
 import com.gestion.repository.ProveedorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -107,5 +109,28 @@ public class ProveedorController {
                     return new ResponseEntity<>(repository.save(proveedor), HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newProveedor), HttpStatus.CREATED));
+    }
+
+    @RequestMapping("/buscar/{campo}/{value}")
+    public ResponseEntity<List<Proveedor>> findProveedorBy(@PathVariable String campo, @PathVariable String value) {
+        try{
+            List<Proveedor> proveedorList = new ArrayList<>();
+            switch (campo){
+                case "nombre":
+                    proveedorList = repository.findAllByNombreStartingWithIgnoreCaseAndActivoTrue(value);
+                    break;
+                case "nombre_fantasia":
+                    proveedorList = repository.findAllByNombreFantasiaStartingWithIgnoreCaseAndActivoTrue(value);
+                    break;
+                case "cuit":
+                    proveedorList = repository.findAllByCuitStartingWithAndActivoTrue(value);
+                    break;
+                default:
+                    proveedorList = new ArrayList<>();
+            }
+            return new ResponseEntity<>(proveedorList,HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
+        }
     }
 }

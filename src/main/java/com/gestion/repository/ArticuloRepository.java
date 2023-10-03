@@ -8,9 +8,11 @@ import java.util.Optional;
 
 public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
 
-    List<Articulo> getArticulosByCuitProveedor(String cuitProveedor);
+    List<Articulo> findAllByCuitProveedorStartingWithAndActivoTrue(String cuitProveedor);
+    List<Articulo> findAllByNombreStartingWithIgnoreCaseAndActivoTrue(String nombre);
 
     Optional<Articulo> getArticuloByNroArticulo(Long nroArticulo);
-
     Optional<Articulo> findArticuloByNroArticulo(Long nroArticulo);
+
+
 }

@@ -34,11 +34,21 @@ public class RepartoController {
     }
 
     @RequestMapping("/numero/{nroReparto}")
-    public ResponseEntity<List<Reparto>> getRepartoByNroReparto(@PathVariable int nroReparto) {
+    public ResponseEntity<List<Reparto>> getRepartosByNroReparto(@PathVariable int nroReparto) {
 
-        List<Reparto> repartos = repository.findAllByNroRepartoOrderByNroReparto(nroReparto).stream()
-        .filter(Reparto::isActivo)
-                .collect(Collectors.toList());;
+        List<Reparto> repartos = repository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(nroReparto);
+
+        if (repartos.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity<>(repartos, HttpStatus.OK);
+    }
+
+    @RequestMapping("/dia_semana/{diaSemana}")
+    public ResponseEntity<List<Reparto>> getRepartosdDiaSemana(@PathVariable String diaSemana) {
+
+        List<Reparto> repartos = repository.findAllByDiaSemanaAndActivoTrue(diaSemana);
 
         if (repartos.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

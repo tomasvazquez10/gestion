@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface RepartoRepository extends JpaRepository<Reparto, Long> {
 
-    List<Reparto> findAllByNroRepartoOrderByNroReparto(int nroReparto);
+    List<Reparto> findAllByNroRepartoAndActivoTrueOrderByNroReparto(int nroReparto);
+    List<Reparto> findAllByDiaSemanaAndActivoTrue(String diaSemana);
 }

@@ -34,6 +34,32 @@ public class ClienteController {
         return new ResponseEntity<>(optCliente.get(),HttpStatus.OK);
     }
 
+    @RequestMapping("/buscar/{campo}/{value}")
+    public ResponseEntity<List<Cliente>> findClientesBy(@PathVariable String campo, @PathVariable String value) {
+        try{
+            List<Cliente> clientes = new ArrayList<>();
+            switch (campo){
+                case "nombre":
+                    clientes = repository.findAllByNombreStartingWithIgnoreCaseAndActivoTrue(value);
+                    break;
+                case "nombre_fantasia":
+                    clientes = repository.findAllByNombreFantasiaStartingWithIgnoreCaseAndActivoTrue(value);
+                    break;
+                case "nro_reparto":
+                    clientes = repository.findByNroRepartoAndActivoTrue(Integer.parseInt(value));
+                    break;
+                case "dni":
+                    clientes = repository.findAllByDniStartingWithAndActivoTrue(value);
+                    break;
+                default:
+                    clientes = new ArrayList<>();
+            }
+            return new ResponseEntity<>(clientes,HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping()
     public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
         try {

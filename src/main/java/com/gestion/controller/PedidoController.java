@@ -92,7 +92,7 @@ public class PedidoController {
 
         try {
             List<Pedido> pedidos = new ArrayList<>();
-            List<Cliente> clientes = clienteRepository.findByNroReparto(nroReparto);
+            List<Cliente> clientes = clienteRepository.findByNroRepartoAndActivoTrue(nroReparto);
 
             pedidos = repository.findAllByDniClienteIn(clientes.stream()
                     .map(Cliente::getDni).collect(Collectors.toList()));

@@ -10,7 +10,11 @@ import java.util.Optional;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    List<Cliente> findByNroReparto(int nroReparto);
+    List<Cliente> findByNroRepartoAndActivoTrue(int nroReparto);
 
     Optional<Cliente> findClienteByDni(String dni);
+
+    List<Cliente> findAllByNombreStartingWithIgnoreCaseAndActivoTrue(String nombre);
+    List<Cliente> findAllByNombreFantasiaStartingWithIgnoreCaseAndActivoTrue(String nombreFantasia);
+    List<Cliente> findAllByDniStartingWithAndActivoTrue(String dni);
 }
