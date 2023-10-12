@@ -1,9 +1,11 @@
 package com.gestion.controller;
 
-import com.gestion.model.Cliente;
-import com.gestion.model.Cuenta;
-import com.gestion.repository.ClienteRepository;
-import com.gestion.repository.CuentaRepository;
+import com.gestion.dto.CuentaDTO;
+import com.gestion.dto.GastoDTO;
+import com.gestion.model.*;
+import com.gestion.repository.*;
+import com.gestion.util.mappers.CuentaMapper;
+import com.gestion.util.mappers.GastoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
@@ -20,18 +23,46 @@ public class CuentaController {
 
     private final CuentaRepository repository;
     private final ClienteRepository clienteRepository;
+    private final ProveedorRepository proveedorRepository;
+    private final CompraRepository compraRepository;
+    private final PedidoRepository pedidoRepository;
+    private final PagoRepository pagoRepository;
 
     @Autowired
-    public CuentaController(CuentaRepository repository, ClienteRepository clienteRepository) {
+    public CuentaController(CuentaRepository repository, ClienteRepository clienteRepository, ProveedorRepository proveedorRepository, CompraRepository compraRepository, PedidoRepository pedidoRepository, PagoRepository pagoRepository) {
         this.repository = repository;
         this.clienteRepository = clienteRepository;
+        this.proveedorRepository = proveedorRepository;
+        this.compraRepository = compraRepository;
+        this.pedidoRepository = pedidoRepository;
+        this.pagoRepository = pagoRepository;
     }
 
     @RequestMapping("/{id}")
-    public ResponseEntity<Cuenta> getCuenta(@PathVariable Long id) {
+    public ResponseEntity<CuentaDTO> getCuenta(@PathVariable Long id) {
 
         Optional<Cuenta> optionalCuenta = repository.findById(id);
-        return new ResponseEntity<>(optionalCuenta.get(), HttpStatus.OK);
+        CuentaDTO cuentaDTO = CuentaMapper.getCuentaDTO(optionalCuenta.get());
+        Optional<Cliente> optionalCliente = clienteRepository.findById(optionalCuenta.get().getIdUsuario());
+        if (optionalCliente.isPresent()){
+            List<Pedido> pedidos = pedidoRepository.findAllByDniClienteOrderByFechaDesc(optionalCliente.get().getDni());
+            //seteo gastos
+            List<GastoDTO> gastos = GastoMapper.getGastoDTOList(pedidos);
+            cuentaDTO.setGastos(gastos);
+            //seteo pagos
+            List<List<Pago>> listPagos = new ArrayList<>();
+            for(Pedido pedido : pedidos){
+                listPagos.add(pagoRepository.findAllByVenta(pedido.getVenta()));
+            }
+            List<Pago> pagos = listPagos.stream().flatMap(List :: stream)
+                    .collect(Collectors.toList());
+            cuentaDTO.setPagos(pagos);
+
+        }else {
+            Optional<Proveedor> optionalProveedor = proveedorRepository.findById(optionalCuenta.get().getIdUsuario());
+
+        }
+        return new ResponseEntity<>(cuentaDTO, HttpStatus.OK);
     }
 
     @RequestMapping("/cliente/dni/{dni}")

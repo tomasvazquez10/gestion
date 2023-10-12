@@ -1,6 +1,5 @@
 package com.gestion.controller;
 
-import com.gestion.model.Proveedor;
 import com.gestion.model.Reparto;
 import com.gestion.repository.RepartoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin
@@ -90,7 +87,7 @@ public class RepartoController {
         try {
             List<Reparto> repartos = repository.findAll(Sort.by(Sort.Direction.ASC,"nroReparto")).stream()
                     .filter(Reparto::isActivo)
-                    .collect(Collectors.toList());;
+                    .collect(Collectors.toList());
             List<Integer> nroRepartos = new ArrayList<>();
             for (Reparto reparto : repartos){
                 if (!nroRepartos.contains(reparto.getNroReparto())){
@@ -102,6 +99,27 @@ public class RepartoController {
             }
 
             return new ResponseEntity<>(nroRepartos, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping("/diaSemana/{nroReparto}")
+    public ResponseEntity<Set<String>> getDiasSemanasDisponibles(@PathVariable int nroReparto){
+        try {
+            Set<String> diasSemana = new HashSet<>(Arrays.asList("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"));
+            List<Reparto> repartos = repository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(nroReparto);
+
+            for (Reparto reparto : repartos){
+                if (diasSemana.contains(reparto.getDiaSemana())){
+                    diasSemana.remove(reparto.getDiaSemana());
+                }
+            }
+            if (repartos.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(diasSemana, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -137,6 +155,7 @@ public class RepartoController {
                 .map(reparto -> {
                     reparto.setNroReparto(newReparto.getNroReparto());
                     reparto.setDiaSemana(newReparto.getDiaSemana());
+                    reparto.setZonaEntrega(newReparto.getZonaEntrega());
                     return new ResponseEntity<>(repository.save(reparto), HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newReparto), HttpStatus.CREATED));

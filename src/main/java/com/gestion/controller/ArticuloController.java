@@ -3,15 +3,19 @@ package com.gestion.controller;
 import com.gestion.dto.ArticuloDTO;
 import com.gestion.model.Articulo;
 import com.gestion.model.PrecioArticulo;
-import com.gestion.model.Proveedor;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.PrecioArticuloRepository;
+import com.gestion.util.GeneratePDFReport;
 import com.gestion.util.mappers.ArticuloMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -127,6 +131,37 @@ public class ArticuloController {
             return new PrecioArticulo();
         }else{
             return precioArticuloList.get(0);
+        }
+    }
+
+    @RequestMapping("/pdf")
+    public ResponseEntity<InputStreamResource> getListadoPDF(){
+        try {
+            List<Articulo> articulos = repository.findAll().stream()
+                    .filter(Articulo::isActivo)
+                    .collect(Collectors.toList());;
+
+            if (articulos.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            List<ArticuloDTO> articuloDTOS = new ArrayList<>();
+            for (Articulo articulo: articulos) {
+                articuloDTOS.add(ArticuloMapper.getArticuloDTO(articulo,getPrecioArticuloByNroArticulo(articulo.getId())));
+            }
+
+            ByteArrayInputStream bis = GeneratePDFReport.getArticuloPDF(articulos);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "inline; filename=listado-articulos.pdf");
+
+            return ResponseEntity
+                    .ok()
+                    .headers(headers)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(new InputStreamResource(bis));
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
