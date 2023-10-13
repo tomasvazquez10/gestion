@@ -4,13 +4,18 @@ import com.gestion.dto.PedidoDTO;
 import com.gestion.dto.ProductoDTO;
 import com.gestion.model.*;
 import com.gestion.repository.*;
+import com.gestion.util.GeneratePDFReport;
 import com.gestion.util.mappers.PedidoMapper;
 import com.gestion.util.mappers.ProductoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,14 +29,16 @@ public class PedidoController {
     private final ClienteRepository clienteRepository;
     private final ArticuloRepository articuloRepository;
     private final CuentaRepository cuentaRepository;
+    private final VentaRepository ventaRepository;
     
     @Autowired
-    public PedidoController(PedidoRepository repository, ProductoRepository productoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository, CuentaRepository cuentaRepository) {
+    public PedidoController(PedidoRepository repository, ProductoRepository productoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository, CuentaRepository cuentaRepository, VentaRepository ventaRepository) {
         this.repository = repository;
         this.productoRepository = productoRepository;
         this.clienteRepository = clienteRepository;
         this.articuloRepository = articuloRepository;
         this.cuentaRepository = cuentaRepository;
+        this.ventaRepository = ventaRepository;
     }
 
     @RequestMapping("/{id}")
@@ -176,6 +183,24 @@ public class PedidoController {
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newPedido), HttpStatus.CREATED));
     }
 
+    @PostMapping("/pdf")
+    public ResponseEntity<InputStreamResource> getListadoPDF(@RequestBody Pedido pedido){
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=listado-clientes.pdf");
+        Optional<Venta> optionalVenta = ventaRepository.findByPedido(pedido);
+
+        ByteArrayInputStream bis = GeneratePDFReport.getPedidoPDF(pedido,optionalVenta.get());
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(bis));
+
+
+    }
+
     private void restarStock(Producto producto) {
 
         Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
@@ -204,7 +229,7 @@ public class PedidoController {
         return productoDTOS;
     }
 
-    public Cuenta getCuentaByDniCliente(String dni) {
+    private Cuenta getCuentaByDniCliente(String dni) {
 
         Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
         if(optionalCliente.isPresent()){

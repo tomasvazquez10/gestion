@@ -1,13 +1,9 @@
 package com.gestion.controller;
 
-import com.gestion.dto.ArticuloDTO;
-import com.gestion.dto.CompraDTO;
 import com.gestion.model.Articulo;
 import com.gestion.model.Compra;
-import com.gestion.model.PrecioArticulo;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.CompraRepository;
-import com.gestion.util.mappers.ArticuloMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -86,6 +82,13 @@ public class CompraController {
                 .map(compra -> {
                     compra.setActivo(false);
                     repository.save(compra);
+                    //chequeo restar la canitdad de stock al articulo
+                    Articulo articulo = compra.getArticulo();
+                    if (articulo.getStock() < compra.getCantidad()){
+                        return new ResponseEntity(HttpStatus.NO_CONTENT);
+                    }
+                    articulo.setStock(articulo.getStock() - compra.getCantidad());
+                    articuloRepository.save(articulo);
                     return new ResponseEntity(HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));

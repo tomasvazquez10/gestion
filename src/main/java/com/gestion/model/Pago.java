@@ -13,7 +13,7 @@ public class Pago {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     @Column
-    private double monto;
+    private Double monto;
     @Column
     private Date fecha;
     @Column
@@ -27,7 +27,7 @@ public class Pago {
 
     public Pago(){};
 
-    public Pago(double monto, Date fecha, String formaPago, int descuento, Venta venta) {
+    public Pago(Double monto, Date fecha, String formaPago, int descuento, Venta venta) {
         this.monto = monto;
         this.fecha = fecha;
         this.formaPago = formaPago;

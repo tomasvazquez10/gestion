@@ -1,14 +1,22 @@
 package com.gestion.controller;
 
+import com.gestion.dto.ArticuloDTO;
+import com.gestion.model.Articulo;
 import com.gestion.model.Cliente;
 import com.gestion.model.Proveedor;
+import com.gestion.util.GeneratePDFReport;
+import com.gestion.util.mappers.ArticuloMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.gestion.repository.ClienteRepository;
 
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -140,5 +148,22 @@ public class ClienteController {
                     return new ResponseEntity<>(repository.save(proveedor), HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newCliente), HttpStatus.CREATED));
+    }
+
+    @PostMapping("/pdf")
+    public ResponseEntity<InputStreamResource> getListadoPDF(@RequestBody List<Cliente> clientes){
+
+            ByteArrayInputStream bis = GeneratePDFReport.getClientesPDF(clientes);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "inline; filename=listado-clientes.pdf");
+
+            return ResponseEntity
+                    .ok()
+                    .headers(headers)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(new InputStreamResource(bis));
+
+
     }
 }
