@@ -49,6 +49,18 @@ public class ArticuloController {
 
     }
 
+    @RequestMapping("/numero/{nroArticulo}")
+    public ResponseEntity<Articulo> getArticuloByNroArticulo(@PathVariable Long nroArticulo) {
+
+        Optional<Articulo> optionalArticulo = repository.findArticuloByNroArticulo(nroArticulo);
+        if (optionalArticulo.isPresent()){
+            return new ResponseEntity<>(optionalArticulo.get(), HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+    }
+
     @PostMapping()
     public ResponseEntity<Articulo> crearArticulo(@RequestBody Articulo articulo) {
         try {

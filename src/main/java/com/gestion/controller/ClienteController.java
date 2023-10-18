@@ -42,6 +42,18 @@ public class ClienteController {
         return new ResponseEntity<>(optCliente.get(),HttpStatus.OK);
     }
 
+    @RequestMapping("/dni/{dni}")
+    public ResponseEntity<Cliente> getClienteByDni(@PathVariable String dni) {
+
+        Optional<Cliente> optCliente = repository.findClienteByDni(dni);
+        if (optCliente.isPresent()){
+            return new ResponseEntity<>(optCliente.get(),HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+    }
+
     @RequestMapping("/buscar/{campo}/{value}")
     public ResponseEntity<List<Cliente>> findClientesBy(@PathVariable String campo, @PathVariable String value) {
         try{

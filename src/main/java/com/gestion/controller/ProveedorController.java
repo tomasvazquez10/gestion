@@ -1,6 +1,5 @@
 package com.gestion.controller;
 
-import com.gestion.model.Cliente;
 import com.gestion.model.Proveedor;
 import com.gestion.repository.ProveedorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +30,18 @@ public class ProveedorController {
 
         Optional<Proveedor> optionalProveedor = repository.findById(id);
         return new ResponseEntity<>(optionalProveedor.get(), HttpStatus.OK);
+    }
+
+    @RequestMapping("/cuit/{cuit}")
+    public ResponseEntity<Proveedor> getProveedorByCuit(@PathVariable String cuit) {
+
+        Optional<Proveedor> optionalProveedor = repository.findProveedorByCuit(cuit);
+        if (optionalProveedor.isPresent()){
+            return new ResponseEntity<>(optionalProveedor.get(),HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
     }
 
     @PostMapping()
