@@ -2,8 +2,12 @@ package com.gestion.controller;
 
 import com.gestion.model.Articulo;
 import com.gestion.model.Compra;
+import com.gestion.model.Cuenta;
+import com.gestion.model.Proveedor;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.CompraRepository;
+import com.gestion.repository.CuentaRepository;
+import com.gestion.repository.ProveedorRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +24,14 @@ public class CompraController {
 
     private final CompraRepository repository;
     private final ArticuloRepository articuloRepository;
+    private final CuentaRepository cuentaRepository;
+    private final ProveedorRepository proveedorRepository;
 
-    public CompraController(CompraRepository repository, ArticuloRepository articuloRepository) {
+    public CompraController(CompraRepository repository, ArticuloRepository articuloRepository, CuentaRepository cuentaRepository, ProveedorRepository proveedorRepository) {
         this.repository = repository;
         this.articuloRepository = articuloRepository;
+        this.cuentaRepository = cuentaRepository;
+        this.proveedorRepository = proveedorRepository;
     }
 
     @RequestMapping("/{id}")
@@ -82,7 +90,7 @@ public class CompraController {
                 .map(compra -> {
                     compra.setActivo(false);
                     repository.save(compra);
-                    //chequeo restar la canitdad de stock al articulo
+                    //chequeo restar la cantidad de stock al articulo
                     Articulo articulo = compra.getArticulo();
                     if (articulo.getStock() < compra.getCantidad()){
                         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -117,8 +125,25 @@ public class CompraController {
 
             //sumo la cantidad al stock de articulo
             articulo.setStock(articulo.getStock() + compra.getCantidad());
+            articulo.setActivo(true);
             articuloRepository.save(articulo);
             nuevaCompra.setArticulo(articulo);
+
+            //busco la cuenta del proveedor y le sumo el total de la compra a favor
+            Optional<Proveedor> optionalProveedor = proveedorRepository.findProveedorByCuit(articulo.getCuitProveedor());
+            Optional<Cuenta> optionalCuenta = cuentaRepository.findCuentaByIdUsuario(optionalProveedor.get().getId());
+            if (optionalCuenta.isPresent()){
+                //sumo al saldo el total
+                Cuenta cuenta = optionalCuenta.get();
+                cuenta.setSaldo(cuenta.getSaldo() + (compra.getCantidad() * compra.getPrecioUnidad()));
+                cuentaRepository.save(cuenta);
+            }else {
+                //creo cuenta
+                Cuenta nuevaCuenta = new Cuenta();
+                nuevaCuenta.setIdUsuario(optionalProveedor.get().getId());
+                nuevaCuenta.setSaldo(compra.getPrecioUnidad() * compra.getCantidad());
+                cuentaRepository.save(nuevaCuenta);
+            }
 
             return new ResponseEntity<>(nuevaCompra, HttpStatus.CREATED);
         } catch (Exception e) {

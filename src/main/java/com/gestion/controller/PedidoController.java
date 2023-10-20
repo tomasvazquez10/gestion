@@ -233,7 +233,7 @@ public class PedidoController {
 
         Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
         if(optionalCliente.isPresent()){
-            Optional<Cuenta> optionalCuenta = Optional.ofNullable(cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId()));
+            Optional<Cuenta> optionalCuenta = cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId());
             Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
             return cuenta;
         }else{

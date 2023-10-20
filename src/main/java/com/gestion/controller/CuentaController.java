@@ -57,9 +57,11 @@ public class CuentaController {
             List<Pago> pagos = listPagos.stream().flatMap(List :: stream)
                     .collect(Collectors.toList());
             cuentaDTO.setPagos(pagos);
+            cuentaDTO.setDniCliente(optionalCliente.get().getDni());
 
         }else {
             Optional<Proveedor> optionalProveedor = proveedorRepository.findById(optionalCuenta.get().getIdUsuario());
+            cuentaDTO.setDniCliente(optionalProveedor.get().getCuit());
 
         }
         return new ResponseEntity<>(cuentaDTO, HttpStatus.OK);
@@ -70,19 +72,18 @@ public class CuentaController {
 
         Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
         if(optionalCliente.isPresent()){
-            Optional<Cuenta> optionalCuenta = Optional.ofNullable(repository.findCuentaByIdUsuario(optionalCliente.get().getId()));
+            Optional<Cuenta> optionalCuenta = repository.findCuentaByIdUsuario(optionalCliente.get().getId());
             Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
             return new ResponseEntity<>(cuenta, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(new Cuenta(), HttpStatus.OK);
         }
-
     }
 
     @RequestMapping("/usuario/{idUsuario}")
     public ResponseEntity<Cuenta> getCuentaByUsuario(@PathVariable Long idUsuario) {
 
-        Optional<Cuenta> optionalCuenta = Optional.ofNullable(repository.findCuentaByIdUsuario(idUsuario));
+        Optional<Cuenta> optionalCuenta = repository.findCuentaByIdUsuario(idUsuario);
         Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
         return new ResponseEntity<>(cuenta, HttpStatus.OK);
     }
@@ -99,11 +100,19 @@ public class CuentaController {
     }
 
     @RequestMapping("/all")
-    public ResponseEntity<List<Cuenta>> getCuentas(){
+    public ResponseEntity<List<CuentaDTO>> getCuentas(){
         try {
-            List<Cuenta> cuentas = new ArrayList<>();
-            cuentas = repository.findAll();
-
+            List<CuentaDTO> cuentas = repository.findAll().stream()
+                    .map( cuenta -> {
+                        CuentaDTO cuentaDTO = CuentaMapper.getCuentaDTO(cuenta);
+                        Optional<Cliente> optionalCliente =clienteRepository.findById(cuenta.getIdUsuario());
+                        if (optionalCliente.isPresent()){
+                            cuentaDTO.setDniCliente(optionalCliente.get().getDni());
+                        }else{
+                            cuentaDTO.setDniCliente(proveedorRepository.findById(cuenta.getIdUsuario()).get().getCuit());
+                        }
+                        return cuentaDTO;
+                    }).collect(Collectors.toList());
 
             if (cuentas.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -111,7 +120,7 @@ public class CuentaController {
 
             return new ResponseEntity<>(cuentas, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
         }
     }
 

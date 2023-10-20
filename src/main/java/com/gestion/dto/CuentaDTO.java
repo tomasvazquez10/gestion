@@ -9,10 +9,19 @@ public class CuentaDTO {
     private Long id;
     private Long idUsuario;
     private double saldo;
+    private String dniCliente;
     private List<Pago> pagos;
     private List<GastoDTO> gastos;
 
     public CuentaDTO() {}
+
+    public String getDniCliente() {
+        return dniCliente;
+    }
+
+    public void setDniCliente(String dniCliente) {
+        this.dniCliente = dniCliente;
+    }
 
     public Long getId() {
         return id;

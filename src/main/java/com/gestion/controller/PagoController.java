@@ -45,6 +45,21 @@ public class PagoController {
 
     }
 
+    @RequestMapping("/saldoPendiente/{idPedido}")
+    public ResponseEntity<Double> getSaldoPendienteByPedido(@PathVariable Long idPedido) {
+
+        Optional<Pedido> optionalPedido = pedidoRepository.findById(idPedido);
+        if (optionalPedido.isPresent()){
+            Pedido pedido = optionalPedido.get();
+            Double saldo = optionalPedido.get().getPrecioTotal() - pedido.getVenta().getTotalPagos();
+            return new ResponseEntity<>(saldo, HttpStatus.OK);
+
+        }else{
+            return new ResponseEntity<>(-1.0,HttpStatus.NOT_FOUND);
+        }
+
+    }
+
     @PostMapping()
     public ResponseEntity<Pago> crearPago(@RequestBody PagoDTO pagoDTO) {
         try {
@@ -106,7 +121,7 @@ public class PagoController {
 
         Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
         if(optionalCliente.isPresent()){
-            Optional<Cuenta> optionalCuenta = Optional.ofNullable(cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId()));
+            Optional<Cuenta> optionalCuenta = cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId());
             Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
             return cuenta;
         }else{

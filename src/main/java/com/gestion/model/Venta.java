@@ -49,4 +49,12 @@ public class Venta {
     public void setPagos(Set<Pago> pagos) {
         this.pagos = pagos;
     }
+
+    public double getTotalPagos(){
+        double total = 0.0;
+        for(Pago pago : pagos){
+            total+= pago.getMonto();
+        }
+        return total;
+    }
 }
