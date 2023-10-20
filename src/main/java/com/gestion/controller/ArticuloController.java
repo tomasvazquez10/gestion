@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -62,12 +63,16 @@ public class ArticuloController {
     }
 
     @PostMapping()
-    public ResponseEntity<Articulo> crearArticulo(@RequestBody Articulo articulo) {
+    public ResponseEntity<ArticuloDTO> crearArticulo(@RequestBody ArticuloDTO articuloDTO) {
         try {
             Articulo nuevoArticulo = repository
-                    .save(new Articulo(articulo.getNombre(),articulo.getDescripcion(),articulo.getCuitProveedor()));
-
-            return new ResponseEntity<>(nuevoArticulo, HttpStatus.CREATED);
+                    .save(new Articulo(articuloDTO.getNombre(),
+                            articuloDTO.getDescripcion(),
+                            articuloDTO.getNroArticulo(),
+                            articuloDTO.getCuitProveedor(),
+                            articuloDTO.getStock()));
+            PrecioArticulo precioArticulo = precioArticuloRepository.save(new PrecioArticulo(nuevoArticulo.getId(), new Date(), articuloDTO.getPrecio()));
+            return new ResponseEntity<>(ArticuloMapper.getArticuloDTO(nuevoArticulo,precioArticulo), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

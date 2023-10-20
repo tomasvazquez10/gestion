@@ -39,6 +39,15 @@ public class Articulo implements Serializable {
         stock = 0;
     }
 
+    public Articulo(String nombre, String descripcion, Long nroArticulo, String cuitProveedor, int stock) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.cuitProveedor = cuitProveedor;
+        activo = true;
+        this.stock = stock;
+        this.nroArticulo = nroArticulo;
+    }
+
     public Articulo() {
     }
 
