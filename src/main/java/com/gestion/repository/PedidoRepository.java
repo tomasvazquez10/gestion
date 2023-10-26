@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     List<Pedido> findAllByDniClienteOrderByFechaDesc(String dniCliente);
-
+    List<Pedido> findAllByEstadoTextoNotOrderByFechaDesc(String estadoTexto);
     List<Pedido> findAllByDniClienteIn(List<String> dniClientes);
 
 }

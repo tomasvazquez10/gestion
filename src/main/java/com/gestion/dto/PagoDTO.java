@@ -11,6 +11,7 @@ public class PagoDTO {
     private String formaPago;
     private int descuento;
     private Long idPedido;
+    private String dniCliente;
 
     public PagoDTO() {
     }
@@ -30,6 +31,14 @@ public class PagoDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getDniCliente() {
+        return dniCliente;
+    }
+
+    public void setDniCliente(String dniCliente) {
+        this.dniCliente = dniCliente;
     }
 
     public double getMonto() {

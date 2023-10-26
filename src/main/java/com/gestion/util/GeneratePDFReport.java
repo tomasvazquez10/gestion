@@ -1,5 +1,7 @@
 package com.gestion.util;
 
+import com.gestion.dto.FacturaDTO;
+import com.gestion.dto.PagoDTO;
 import com.gestion.model.*;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
@@ -8,6 +10,8 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class GeneratePDFReport {
@@ -288,5 +292,104 @@ public class GeneratePDFReport {
         }
 
         return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    public static ByteArrayInputStream getPagosPDF(List<PagoDTO> pagos) {
+
+        Document document = new Document();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+
+            PdfPTable table = new PdfPTable(6);
+            table.setWidthPercentage(98);
+            table.setWidths(new int[]{1, 3, 3, 3, 3, 3});
+
+            Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+
+            PdfPCell hcell;
+            hcell = new PdfPCell(new Phrase("Id", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Monto", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Fecha", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Forma Pago", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("ID Pedido", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("DNI Cliente", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            for (PagoDTO pagoDTO : pagos) {
+
+                PdfPCell cell;
+
+                cell = new PdfPCell(new Phrase(pagoDTO.getId().toString()));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase("$"+(pagoDTO.getMonto())));
+                cell.setPaddingLeft(5);
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                table.addCell(cell);
+
+                String strDate = dateFormat.format(pagoDTO.getFecha());
+                cell = new PdfPCell(new Phrase(strDate));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setPaddingRight(5);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(pagoDTO.getFormaPago()));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(pagoDTO.getIdPedido().toString()));
+                cell.setPaddingLeft(5);
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(pagoDTO.getDniCliente()));
+                cell.setPaddingLeft(5);
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                table.addCell(cell);
+            }
+
+            PdfWriter.getInstance(document, out);
+            document.open();
+            document.addTitle("Listado de Pagos");
+            document.add(table);
+            document.close();
+
+        } catch (DocumentException ex) {
+
+        }
+        return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    public static ByteArrayInputStream getFacturaPDF(FacturaDTO facturaDTO){
+
+        FacturaPDF facturaPDF = new FacturaPDF();
+        facturaPDF.setFactura(facturaDTO);
+        facturaPDF.setDocument(new Document());
+
+        return facturaPDF.createPdf();
     }
 }

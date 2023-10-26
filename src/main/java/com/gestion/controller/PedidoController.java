@@ -1,5 +1,6 @@
 package com.gestion.controller;
 
+import com.gestion.dto.FacturaDTO;
 import com.gestion.dto.PedidoDTO;
 import com.gestion.dto.ProductoDTO;
 import com.gestion.model.*;
@@ -49,9 +50,24 @@ public class PedidoController {
             PedidoDTO pedidoDTO = PedidoMapper.getPedidoDTO(optionalPedido.get(),getProductosDTO(optionalPedido.get().getProductos()));
             return new ResponseEntity<>(pedidoDTO, HttpStatus.OK);
         }else{
-            return new ResponseEntity<>(new PedidoDTO(),HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new PedidoDTO(),HttpStatus.NO_CONTENT);
         }
 
+    }
+
+    @RequestMapping("/all")
+    public ResponseEntity<List<Pedido>> getPedidos(){
+        try {
+            List<Pedido> pedidos = repository.findAllByEstadoTextoNotOrderByFechaDesc("CANCELADO");
+
+            if (pedidos.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(pedidos, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @RequestMapping("/dniCliente/{dniCliente}")
@@ -149,17 +165,30 @@ public class PedidoController {
         }
     }
 
-    private void crearCuenta(String dniCliente, Double precioTotal) {
+    @RequestMapping("/factura/{id}")
+    public ResponseEntity<InputStreamResource> getFacturaPDF(@PathVariable Long id) {
 
-        try {
-            Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
-            if (optionalCliente.isPresent()){
-                Cuenta nuevaCuenta = cuentaRepository.save(new Cuenta(optionalCliente.get().getId(),-precioTotal));
-            }
+        Optional<Pedido> optionalPedido = repository.findById(id);
+        PedidoDTO pedidoDTO = PedidoMapper.getPedidoDTO(optionalPedido.get(),getProductosDTO(optionalPedido.get().getProductos()));
+        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(pedidoDTO.getDniCliente());
 
-        } catch (Exception e) {
-            System.out.println("ERROR");
-        }
+        FacturaDTO facturaDTO = new FacturaDTO();
+        facturaDTO.setPedido(pedidoDTO);
+        facturaDTO.setCliente(optionalCliente.get());
+        facturaDTO.setNumero(pedidoDTO.getId().intValue());
+
+        ByteArrayInputStream bis = GeneratePDFReport.getFacturaPDF(facturaDTO);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=factura.pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(bis));
+
+
     }
 
     @PostMapping("/edit")
@@ -199,6 +228,19 @@ public class PedidoController {
                 .body(new InputStreamResource(bis));
 
 
+    }
+
+    private void crearCuenta(String dniCliente, Double precioTotal) {
+
+        try {
+            Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
+            if (optionalCliente.isPresent()){
+                Cuenta nuevaCuenta = cuentaRepository.save(new Cuenta(optionalCliente.get().getId(),-precioTotal));
+            }
+
+        } catch (Exception e) {
+            System.out.println("ERROR");
+        }
     }
 
     private void restarStock(Producto producto) {
@@ -241,5 +283,9 @@ public class PedidoController {
         }
 
     }
+
+
+
+
     
 }
