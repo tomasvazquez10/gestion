@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -138,9 +139,10 @@ public class PedidoController {
             if(pedido.getFecha() == null || pedido.getDniCliente() == null || pedido.getDniCliente().equals("")){
                 return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
             }
-
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date fechaDate = sdf.parse(pedido.getFechaStr());
             Pedido nuevoPedido = repository
-                .save(new Pedido(pedido.getFecha(),pedido.getEstado(),pedido.getDniCliente(),pedido.getPrecioTotal(),pedido.getProductos()));
+                .save(new Pedido(fechaDate,pedido.getEstado(),pedido.getDniCliente(),pedido.getPrecioTotal(),pedido.getProductos()));
 
             Set<Producto> nuevosProductos = new HashSet<>();
             for (Producto producto: pedido.getProductos()) {

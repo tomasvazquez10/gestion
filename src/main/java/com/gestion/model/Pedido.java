@@ -24,6 +24,7 @@ public class Pedido {
     private Double precioTotal;
 
     private String estadoTexto;
+    private String fechaStr;
 
     //@JsonManagedReference
     @OneToMany(mappedBy = "pedido")
@@ -111,5 +112,13 @@ public class Pedido {
 
     public void setEstadoTexto(String estadoTexto) {
         this.estadoTexto = estadoTexto;
+    }
+
+    public String getFechaStr() {
+        return fechaStr;
+    }
+
+    public void setFechaStr(String fechaStr) {
+        this.fechaStr = fechaStr;
     }
 }

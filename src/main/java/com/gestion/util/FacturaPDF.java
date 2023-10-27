@@ -9,7 +9,6 @@ import com.lowagie.text.pdf.*;
 import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -111,7 +110,6 @@ public class FacturaPDF {
         // Start a new page
         // document.newPage();
     }
-
 
     private  void addEmptyLine(Paragraph paragraph, int number) {
         for (int i = 0; i < number; i++) {

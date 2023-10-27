@@ -153,34 +153,17 @@ public class ArticuloController {
         }
     }
 
-    @RequestMapping("/pdf")
-    public ResponseEntity<InputStreamResource> getListadoPDF(){
-        try {
-            List<Articulo> articulos = repository.findAll().stream()
-                    .filter(Articulo::isActivo)
-                    .collect(Collectors.toList());;
+    @PostMapping("/pdf")
+    public ResponseEntity<InputStreamResource> getListadoPDF(@RequestBody List<Articulo> articulos){
+        ByteArrayInputStream bis = GeneratePDFReport.getArticuloPDF(articulos);
 
-            if (articulos.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            List<ArticuloDTO> articuloDTOS = new ArrayList<>();
-            for (Articulo articulo: articulos) {
-                articuloDTOS.add(ArticuloMapper.getArticuloDTO(articulo,getPrecioArticuloByNroArticulo(articulo.getId())));
-            }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=listado-articulos.pdf");
 
-            ByteArrayInputStream bis = GeneratePDFReport.getArticuloPDF(articulos);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "inline; filename=listado-articulos.pdf");
-
-            return ResponseEntity
-                    .ok()
-                    .headers(headers)
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .body(new InputStreamResource(bis));
-
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(bis));
     }
 }

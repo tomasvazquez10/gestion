@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -95,6 +96,43 @@ public class ReporteController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(new InputStreamResource(bis));
 
+
+    }
+
+    @RequestMapping("pedidos/fecha/{fecha}")
+    public ResponseEntity<List<Pedido>> getPedidosByFecha(@PathVariable String fecha) {
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date fechaDate = sdf.parse(fecha);
+            List<Pedido> pedidos = pedidoRepository.findAllByFecha(fechaDate);
+
+            if (pedidos.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(pedidos, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    @RequestMapping("pedidos/fechas/{fechaDesde}/{fechaHasta}")
+    public ResponseEntity<List<Pedido>> getPedidosByFechas(@PathVariable String fechaDesde, @PathVariable String fechaHasta) {
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            List<Pedido> pedidos = pedidoRepository.findAllByFechaBetweenOrderByFechaAsc(sdf.parse(fechaDesde),sdf.parse(fechaHasta));
+
+            if (pedidos.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(pedidos, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 }
