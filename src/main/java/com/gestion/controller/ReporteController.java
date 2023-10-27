@@ -1,12 +1,11 @@
 package com.gestion.controller;
 
+import com.gestion.dto.ArticuloDTO;
 import com.gestion.dto.PagoDTO;
 import com.gestion.model.*;
-import com.gestion.repository.ClienteRepository;
-import com.gestion.repository.PedidoRepository;
-import com.gestion.repository.RepartoRepository;
-import com.gestion.repository.VentaRepository;
+import com.gestion.repository.*;
 import com.gestion.util.GeneratePDFReport;
+import com.gestion.util.mappers.ArticuloMapper;
 import com.gestion.util.mappers.PagoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -30,14 +29,15 @@ public class ReporteController {
     private final VentaRepository ventaRepository;
     private final PedidoRepository pedidoRepository;
     private final ClienteRepository clienteRepository;
-    private final RepartoRepository repartoRepository;
+    private final ArticuloRepository articuloRepository;
+
 
     @Autowired
-    public ReporteController(VentaRepository ventaRepository, RepartoRepository repartoRepository, PedidoRepository pedidoRepository, ClienteRepository clienteRepository) {
+    public ReporteController(VentaRepository ventaRepository, PedidoRepository pedidoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository) {
         this.ventaRepository = ventaRepository;
-        this.repartoRepository = repartoRepository;
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
+        this.articuloRepository = articuloRepository;
     }
 
     @RequestMapping("/pagos/cliente/{dniCliente}")
@@ -132,6 +132,76 @@ public class ReporteController {
 
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    @RequestMapping("/articulos/masVentas/{fechaDesde}/{fechaHasta}")
+    public ResponseEntity<List<ArticuloDTO>> getArticulosMasVendidos(@PathVariable String fechaDesde, @PathVariable String fechaHasta) {
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            List<Pedido> pedidos = pedidoRepository.findAllByFechaBetweenOrderByFechaAsc(sdf.parse(fechaDesde), sdf.parse(fechaHasta));
+            List<ArticuloDTO> articuloDTOList = getListaArticulosMasVendidos(pedidos);
+
+            if (articuloDTOList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(articuloDTOList, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping("/articulos/masVendidos")
+    public ResponseEntity<List<ArticuloDTO>> getArticulosMasVendidos() {
+
+        try {
+            List<ArticuloDTO> articuloDTOList = getListaArticulosMasVendidos(pedidoRepository.findAll());
+
+            if (articuloDTOList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(articuloDTOList, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private List<ArticuloDTO> getListaArticulosMasVendidos(List<Pedido> pedidos){
+
+        try {
+            List<Producto> productos = pedidos.stream().flatMap(
+                    pedido -> pedido.getProductos().stream())
+                    .collect(Collectors.toList());
+            Map<Long, Integer> articuloMap = new HashMap<>();
+            for (Producto producto : productos) {
+                Long nroArticulo = producto.getNroArticulo();
+                if (articuloMap.containsKey(nroArticulo)){
+                    int cant = articuloMap.remove(nroArticulo);
+                    articuloMap.put(nroArticulo,producto.getCantidad()+cant);
+                }else {
+                    articuloMap.put(nroArticulo,producto.getCantidad());
+                }
+            }
+
+            List<ArticuloDTO> articuloDTOS = new ArrayList<>();
+            for (Map.Entry<Long, Integer> entry : articuloMap.entrySet()) {
+                Long nroArticulo = entry.getKey();
+                Integer cantidad = entry.getValue();
+
+                Optional<Articulo> optionalArticulo = articuloRepository.findById(nroArticulo);
+                optionalArticulo.ifPresent(articulo -> {
+                    articuloDTOS.add(ArticuloMapper.getArticuloDTOVentas(articulo, cantidad));
+                });
+            }
+
+            articuloDTOS.sort((a, b) -> Integer.compare(b.getVentasTotales(), a.getVentasTotales()));
+            return articuloDTOS;
+        } catch (Exception e) {
+            return new ArrayList<>();
         }
 
     }

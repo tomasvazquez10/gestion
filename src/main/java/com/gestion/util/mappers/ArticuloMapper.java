@@ -19,6 +19,19 @@ public class ArticuloMapper {
         return articuloDTO;
     }
 
+    public static ArticuloDTO getArticuloDTOVentas(Articulo articulo, int ventasTotales){
+        ArticuloDTO articuloDTO = new ArticuloDTO();
+        articuloDTO.setId(articulo.getId());
+        articuloDTO.setNombre(articulo.getNombre());
+        articuloDTO.setDescripcion(articulo.getDescripcion());
+        articuloDTO.setCuitProveedor(articulo.getCuitProveedor());
+        articuloDTO.setStock(articulo.getStock());
+        articuloDTO.setVentasTotales(ventasTotales);
+        articuloDTO.setNroArticulo(articulo.getNroArticulo());
+
+        return articuloDTO;
+    }
+
     public static Articulo getArticulo(ArticuloDTO articuloDTO){
         Articulo articulo = new Articulo();
         articulo.setId(articuloDTO.getId());

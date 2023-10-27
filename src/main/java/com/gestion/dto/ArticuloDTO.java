@@ -11,6 +11,7 @@ public class ArticuloDTO {
     private String cuitProveedor;
     private int stock;
     private Double precio;
+    private int ventasTotales;
 
     public ArticuloDTO() {
     }
@@ -23,6 +24,14 @@ public class ArticuloDTO {
         this.cuitProveedor = cuitProveedor;
         this.stock = stock;
         this.precio = precio;
+    }
+
+    public int getVentasTotales() {
+        return ventasTotales;
+    }
+
+    public void setVentasTotales(int ventasTotales) {
+        this.ventasTotales = ventasTotales;
     }
 
     public Long getId() {
