@@ -30,17 +30,15 @@ public class PedidoController {
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
     private final ArticuloRepository articuloRepository;
-    private final CuentaRepository cuentaRepository;
     private final RepartoRepository repartoRepository;
     
     @Autowired
     public PedidoController(PedidoRepository repository, ProductoRepository productoRepository, ClienteRepository clienteRepository,
-                            ArticuloRepository articuloRepository, CuentaRepository cuentaRepository, RepartoRepository repartoRepository) {
+                            ArticuloRepository articuloRepository, RepartoRepository repartoRepository) {
         this.repository = repository;
         this.productoRepository = productoRepository;
         this.clienteRepository = clienteRepository;
         this.articuloRepository = articuloRepository;
-        this.cuentaRepository = cuentaRepository;
         this.repartoRepository = repartoRepository;
     }
 

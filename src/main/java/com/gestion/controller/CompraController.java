@@ -2,11 +2,9 @@ package com.gestion.controller;
 
 import com.gestion.model.Articulo;
 import com.gestion.model.Compra;
-import com.gestion.model.Cuenta;
 import com.gestion.model.Proveedor;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.CompraRepository;
-import com.gestion.repository.CuentaRepository;
 import com.gestion.repository.ProveedorRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +22,11 @@ public class CompraController {
 
     private final CompraRepository repository;
     private final ArticuloRepository articuloRepository;
-    private final CuentaRepository cuentaRepository;
     private final ProveedorRepository proveedorRepository;
 
-    public CompraController(CompraRepository repository, ArticuloRepository articuloRepository, CuentaRepository cuentaRepository, ProveedorRepository proveedorRepository) {
+    public CompraController(CompraRepository repository, ArticuloRepository articuloRepository, ProveedorRepository proveedorRepository) {
         this.repository = repository;
         this.articuloRepository = articuloRepository;
-        this.cuentaRepository = cuentaRepository;
         this.proveedorRepository = proveedorRepository;
     }
 

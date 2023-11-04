@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/cuenta")
 public class CuentaController {
 
-    private final CuentaRepository repository;
     private final ClienteRepository clienteRepository;
     private final ProveedorRepository proveedorRepository;
     private final CompraRepository compraRepository;
@@ -31,8 +30,7 @@ public class CuentaController {
     private final PagoRepository pagoRepository;
 
     @Autowired
-    public CuentaController(CuentaRepository repository, ClienteRepository clienteRepository, ProveedorRepository proveedorRepository, CompraRepository compraRepository, PedidoRepository pedidoRepository, PagoRepository pagoRepository) {
-        this.repository = repository;
+    public CuentaController(ClienteRepository clienteRepository, ProveedorRepository proveedorRepository, CompraRepository compraRepository, PedidoRepository pedidoRepository, PagoRepository pagoRepository) {
         this.clienteRepository = clienteRepository;
         this.proveedorRepository = proveedorRepository;
         this.compraRepository = compraRepository;
@@ -79,6 +77,7 @@ public class CuentaController {
         return new ResponseEntity<>(cuentaDTO, HttpStatus.OK);
     }
 
+    /*
     @RequestMapping("/cliente/dni/{dni}")
     public ResponseEntity<Cuenta> getCuentaByDniCliente(@PathVariable String dni) {
 
@@ -90,6 +89,7 @@ public class CuentaController {
         }else{
             return new ResponseEntity<>(new Cuenta(), HttpStatus.OK);
         }
+
     }
 
     @RequestMapping("/usuario/{idUsuario}")
@@ -98,6 +98,7 @@ public class CuentaController {
         Optional<Cuenta> optionalCuenta = repository.findCuentaByIdUsuario(idUsuario);
         Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
         return new ResponseEntity<>(cuenta, HttpStatus.OK);
+
     }
 
     @PostMapping()
@@ -110,22 +111,19 @@ public class CuentaController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    */
     @RequestMapping("/all")
     public ResponseEntity<List<CuentaDTO>> getCuentas(){
         try {
-            List<CuentaDTO> cuentas = repository.findAll().stream()
-                    .map( cuenta -> {
-                        CuentaDTO cuentaDTO = CuentaMapper.getCuentaDTO(cuenta);
-                        Optional<Cliente> optionalCliente =clienteRepository.findById(cuenta.getIdUsuario());
-                        if (optionalCliente.isPresent()){
-                            cuentaDTO.setDniCliente(optionalCliente.get().getDni());
-                        }else{
-                            cuentaDTO.setDniCliente(proveedorRepository.findById(cuenta.getIdUsuario()).get().getCuit());
-                        }
-                        return cuentaDTO;
-                    }).collect(Collectors.toList());
-
+           List<CuentaDTO> cuentas = new ArrayList<>();
+           List<Cliente> clientes = clienteRepository.findAll();
+           for (Cliente cliente : clientes){
+               cuentas.add(new CuentaDTO(cliente.getId(), cliente.getId(), cliente.getSaldo(), cliente.getDni()));
+           }
+           List<Proveedor> proveedores = proveedorRepository.findAll();
+           for (Proveedor proveedor : proveedores){
+               cuentas.add(new CuentaDTO(proveedor.getId(), proveedor.getId(), proveedor.getSaldo(), proveedor.getCuit()));
+           }
             if (cuentas.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -136,6 +134,7 @@ public class CuentaController {
         }
     }
 
+    /*
     @PutMapping("/{id}")
     public ResponseEntity<Cuenta> updateCuenta(@RequestBody Cuenta newCuenta, @PathVariable Long id){
 
@@ -159,5 +158,5 @@ public class CuentaController {
                 })
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newCuenta), HttpStatus.CREATED));
     }
-
+    */
 }

@@ -3,6 +3,7 @@ package com.gestion.dto;
 import com.gestion.model.Compra;
 import com.gestion.model.Pago;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CuentaDTO {
@@ -16,6 +17,16 @@ public class CuentaDTO {
     private List<GastoDTO> gastos;
 
     public CuentaDTO() {}
+
+    public CuentaDTO(Long id, Long idUsuario, double saldo, String dniCliente){
+        this.id = id;
+        this.idUsuario = idUsuario;
+        this.saldo = saldo;
+        this.dniCliente = dniCliente;
+        this.pagos = new ArrayList<>();
+        this.compras = new ArrayList<>();
+        this.gastos = new ArrayList<>();
+    }
 
     public String getDniCliente() {
         return dniCliente;

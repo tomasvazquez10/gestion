@@ -2,11 +2,15 @@ package com.gestion.controller;
 
 import com.gestion.dto.ArticuloDTO;
 import com.gestion.dto.PagoDTO;
+import com.gestion.dto.PedidoDTO;
+import com.gestion.dto.ProductoDTO;
 import com.gestion.model.*;
 import com.gestion.repository.*;
 import com.gestion.util.GeneratePDFReport;
 import com.gestion.util.mappers.ArticuloMapper;
 import com.gestion.util.mappers.PagoMapper;
+import com.gestion.util.mappers.PedidoMapper;
+import com.gestion.util.mappers.ProductoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -96,7 +100,7 @@ public class ReporteController {
     }
 
     @RequestMapping("pedidos/fecha/{fecha}")
-    public ResponseEntity<List<Pedido>> getPedidosByFecha(@PathVariable String fecha) {
+    public ResponseEntity<List<PedidoDTO>> getPedidosByFecha(@PathVariable String fecha) {
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -106,7 +110,7 @@ public class ReporteController {
             if (pedidos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(pedidos, HttpStatus.OK);
+            return new ResponseEntity<>(getPedidosDTO(pedidos), HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -115,7 +119,7 @@ public class ReporteController {
     }
 
     @RequestMapping("pedidos/fechas/{fechaDesde}/{fechaHasta}")
-    public ResponseEntity<List<Pedido>> getPedidosByFechas(@PathVariable String fechaDesde, @PathVariable String fechaHasta) {
+    public ResponseEntity<List<PedidoDTO>> getPedidosByFechas(@PathVariable String fechaDesde, @PathVariable String fechaHasta) {
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -124,7 +128,7 @@ public class ReporteController {
             if (pedidos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(pedidos, HttpStatus.OK);
+            return new ResponseEntity<>(getPedidosDTO(pedidos), HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -217,5 +221,17 @@ public class ReporteController {
             return new ArrayList<>();
         }
 
+    }
+
+    private List<PedidoDTO> getPedidosDTO(List<Pedido> pedidos){
+        return pedidos.stream().map(pedido -> PedidoMapper.getPedidoDTO(pedido, getProductosDTO(pedido.getProductos()))).collect(Collectors.toList());
+    }
+
+    private Set<ProductoDTO> getProductosDTO(List<Producto> productos){
+        Set<ProductoDTO> productoDTOS = new HashSet<>();
+        for(Producto producto : productos){
+            productoDTOS.add(ProductoMapper.getProductoDTO(producto));
+        }
+        return productoDTOS;
     }
 }
