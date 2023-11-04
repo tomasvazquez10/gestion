@@ -6,13 +6,14 @@ import com.gestion.model.Producto;
 
 public class ProductoMapper {
 
-    public static ProductoDTO getProductoDTO(Articulo articulo, Producto producto){
+    public static ProductoDTO getProductoDTO(Producto producto){
+        Articulo articulo = producto.getPk().getArticulo();
         ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setId(producto.getId());
+        productoDTO.setId(articulo.getId());
         productoDTO.setNombre(articulo.getNombre());
         productoDTO.setCantidad(producto.getCantidad());
-        productoDTO.setPrecio(producto.getPrecio());
-        productoDTO.setNroArticulo(producto.getNroArticulo());
+        productoDTO.setPrecio(articulo.getPrecio());
+        productoDTO.setNroArticulo(articulo.getNroArticulo());
 
         return productoDTO;
     }

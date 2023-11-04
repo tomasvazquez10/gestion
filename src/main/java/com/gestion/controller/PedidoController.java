@@ -27,20 +27,21 @@ import java.util.stream.Collectors;
 public class PedidoController {
     
     private final PedidoRepository repository;
-    private final ProductoRepository productoRepository;
     private final ClienteRepository clienteRepository;
+    private final ProductoRepository productoRepository;
     private final ArticuloRepository articuloRepository;
     private final CuentaRepository cuentaRepository;
-    private final VentaRepository ventaRepository;
+    private final RepartoRepository repartoRepository;
     
     @Autowired
-    public PedidoController(PedidoRepository repository, ProductoRepository productoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository, CuentaRepository cuentaRepository, VentaRepository ventaRepository) {
+    public PedidoController(PedidoRepository repository, ProductoRepository productoRepository, ClienteRepository clienteRepository,
+                            ArticuloRepository articuloRepository, CuentaRepository cuentaRepository, RepartoRepository repartoRepository) {
         this.repository = repository;
         this.productoRepository = productoRepository;
         this.clienteRepository = clienteRepository;
         this.articuloRepository = articuloRepository;
         this.cuentaRepository = cuentaRepository;
-        this.ventaRepository = ventaRepository;
+        this.repartoRepository = repartoRepository;
     }
 
     @RequestMapping("/{id}")
@@ -57,9 +58,9 @@ public class PedidoController {
     }
 
     @RequestMapping("/all")
-    public ResponseEntity<List<Pedido>> getPedidos(){
+    public ResponseEntity<List<PedidoDTO>> getPedidos(){
         try {
-            List<Pedido> pedidos = repository.findAllByEstadoTextoNotOrderByFechaDesc("CANCELADO");
+            List<PedidoDTO> pedidos = getPedidosDTO(repository.findAllByEstadoTextoNotOrderByFechaDesc("CANCELADO"));
 
             if (pedidos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -72,11 +73,15 @@ public class PedidoController {
     }
 
     @RequestMapping("/dniCliente/{dniCliente}")
-    public ResponseEntity<List<Pedido>> getPedidosByDniCliente(@PathVariable String dniCliente) {
+    public ResponseEntity<List<PedidoDTO>> getPedidosByDniCliente(@PathVariable String dniCliente) {
 
         try {
-            List<Pedido> pedidos = new ArrayList<>();
-            pedidos = repository.findAllByDniClienteOrderByFechaDesc(dniCliente);
+            List<PedidoDTO> pedidos = new ArrayList<>();
+            Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
+            if (optionalCliente.isPresent()){
+                pedidos = getPedidosDTO(repository.findAllByClienteOrderByFechaDesc(optionalCliente.get()));
+            }
+
 
             if (pedidos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -90,15 +95,15 @@ public class PedidoController {
     }
 
     @RequestMapping("/cliente/{idCliente}")
-    public ResponseEntity<List<Pedido>> getPedidosByIdCliente(@PathVariable Long idCliente) {
+    public ResponseEntity<List<PedidoDTO>> getPedidosByIdCliente(@PathVariable Long idCliente) {
 
         try {
-            List<Pedido> pedidos = new ArrayList<>();
+            List<PedidoDTO> pedidos = new ArrayList<>();
             Optional<Cliente> optCliente = clienteRepository.findById(idCliente);
             if (!optCliente.isPresent()){
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            pedidos = repository.findAllByDniClienteOrderByFechaDesc(optCliente.get().getDni());
+            pedidos = getPedidosDTO(repository.findAllByClienteOrderByFechaDesc(optCliente.get()));
 
             if (pedidos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -112,14 +117,18 @@ public class PedidoController {
     }
 
     @RequestMapping("/reparto/{nroReparto}")
-    public ResponseEntity<List<Pedido>> getPedidosByNroReparto(@PathVariable int nroReparto) {
+    public ResponseEntity<List<PedidoDTO>> getPedidosByNroReparto(@PathVariable int nroReparto) {
 
         try {
-            List<Pedido> pedidos = new ArrayList<>();
-            List<Cliente> clientes = clienteRepository.findByNroRepartoAndActivoTrue(nroReparto);
+            List<PedidoDTO> pedidos = new ArrayList<>();
+            List<Reparto> repartos = repartoRepository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(nroReparto);
+            List<Cliente> clientes = new ArrayList<>();
+            if (!repartos.isEmpty()){
+                clientes = clienteRepository.findByRepartoAndActivoTrue(repartos.get(0));
+            }
 
-            pedidos = repository.findAllByDniClienteIn(clientes.stream()
-                    .map(Cliente::getDni).collect(Collectors.toList()));
+
+            pedidos = getPedidosDTO(repository.findAllByClienteIn(clientes));
 
             if (pedidos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -133,35 +142,34 @@ public class PedidoController {
     }
 
     @PostMapping()
-    public ResponseEntity<Pedido> crearPedido(@RequestBody Pedido pedido) {
+    public ResponseEntity<Pedido> crearPedido(@RequestBody PedidoDTO pedidoDTO) {
         try {
 
-            if(pedido.getFecha() == null || pedido.getDniCliente() == null || pedido.getDniCliente().equals("")){
+            if(pedidoDTO.getFecha() == null || pedidoDTO.getDniCliente() == null){
                 return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
             }
+            Cliente cliente = clienteRepository.findClienteByDni(pedidoDTO.getDniCliente()).get();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date fechaDate = sdf.parse(pedido.getFechaStr());
-            Pedido nuevoPedido = repository
-                .save(new Pedido(fechaDate,pedido.getEstado(),pedido.getDniCliente(),pedido.getPrecioTotal(),pedido.getProductos()));
+            Date fechaDate = sdf.parse(pedidoDTO.getFechaStr());
+            Pedido nuevoPedido = repository.save(new Pedido(fechaDate, 0, cliente, pedidoDTO.getPrecioTotal()));
 
-            Set<Producto> nuevosProductos = new HashSet<>();
-            for (Producto producto: pedido.getProductos()) {
-                //resto la cantidad del stock del articulo
+            List<Producto> nuevosProds = new ArrayList<>();
+            for(ProductoDTO productoDTO : pedidoDTO.getProductos()){
+                Articulo articulo = articuloRepository.findById(productoDTO.getNroArticulo()).get();
+                Producto producto = new Producto(nuevoPedido, articulo, productoDTO.getCantidad());
+                productoRepository.save(producto);
                 restarStock(producto);
-                nuevosProductos.add(productoRepository.save(new Producto(producto.getNroArticulo(),producto.getCantidad(),producto.getPrecio(),nuevoPedido)));
+                nuevosProds.add(producto);
             }
-            nuevoPedido.setProductos(nuevosProductos);
+            //restar saldo
+            cliente.setSaldo( cliente.getSaldo() - pedidoDTO.getPrecioTotal());
+            clienteRepository.save(cliente);
 
-            //resto el total de la cuenta
-            Cuenta cuenta = getCuentaByDniCliente(pedido.getDniCliente());
-            if (cuenta.getId() != null){
-                cuenta.setSaldo(cuenta.getSaldo() - pedido.getPrecioTotal());
-                Cuenta nuevaCuenta = cuentaRepository.save(cuenta);
-            }else{
-                //creo cuenta al cliente
-                crearCuenta(pedido.getDniCliente(), pedido.getPrecioTotal());
-            }
-            return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
+            //seteo productos
+            nuevoPedido.setProductos(nuevosProds);
+            repository.save(nuevoPedido);
+
+            return new ResponseEntity<>(new Pedido(), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -194,24 +202,23 @@ public class PedidoController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<Pedido> editPedido(@RequestBody Pedido newPedido) {
+    public ResponseEntity<Pedido> editPedido(@RequestBody PedidoDTO newPedido) {
         return repository.findById(newPedido.getId())
                 .map(pedido -> {
                     pedido.setFecha(newPedido.getFecha());
                     pedido.setEstadoTexto(newPedido.getEstadoTexto());
-                    pedido.setEstado(newPedido.getEstado());
-                    pedido.setDniCliente(newPedido.getDniCliente());
-                    pedido.setPrecioTotal(newPedido.getPrecioTotal());
-                    pedido.setProductos(newPedido.getProductos());
-                    if(newPedido.getEstadoTexto().equals("CANCELADO") && newPedido.getEstado()==0){
-                        for (Producto producto: newPedido.getProductos()) {
-                            sumarStock(producto);
+                    if(newPedido.getEstadoTexto().equals("CANCELADO")){
+                        for (ProductoDTO productoDTO: newPedido.getProductos()) {
+                            sumarStock(productoDTO);
                         }
+                        pedido.setEstado(3);
+                    }else if (newPedido.getEstadoTexto().equals("ENTREGADO")){
+                        pedido.setEstado(1);
                     }
 
                     return new ResponseEntity<>(repository.save(pedido), HttpStatus.OK);
                 })
-                .orElseGet(() -> new ResponseEntity<>(repository.save(newPedido), HttpStatus.CREATED));
+                .orElseGet(() -> new ResponseEntity<>(repository.save(new Pedido()), HttpStatus.CREATED));
     }
 
     @PostMapping("/pdf")
@@ -219,9 +226,8 @@ public class PedidoController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "inline; filename=listado-clientes.pdf");
-        Optional<Venta> optionalVenta = ventaRepository.findByPedido(pedido);
 
-        ByteArrayInputStream bis = GeneratePDFReport.getPedidoPDF(pedido,optionalVenta.get());
+        ByteArrayInputStream bis = GeneratePDFReport.getPedidoPDF(pedido);
 
         return ResponseEntity
                 .ok()
@@ -232,58 +238,33 @@ public class PedidoController {
 
     }
 
-    private void crearCuenta(String dniCliente, Double precioTotal) {
-
-        try {
-            Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
-            if (optionalCliente.isPresent()){
-                Cuenta nuevaCuenta = cuentaRepository.save(new Cuenta(optionalCliente.get().getId(),-precioTotal));
-            }
-
-        } catch (Exception e) {
-            System.out.println("ERROR");
-        }
-    }
 
     private void restarStock(Producto producto) {
 
-        Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
-        if (articuloOptional.isPresent()) {
-            Articulo articulo = articuloOptional.get();
-            articulo.setStock(articulo.getStock() - producto.getCantidad());
-            articuloRepository.save(articulo);
-        }
+        Articulo articulo = producto.getPk().getArticulo();
+        articulo.setStock(articulo.getStock() - producto.getCantidad());
+        articuloRepository.save(articulo);
+
     }
 
-    private void sumarStock(Producto producto){
-        Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
-        if (articuloOptional.isPresent()) {
-            Articulo articulo = articuloOptional.get();
-            articulo.setStock(articulo.getStock() + producto.getCantidad());
-            articuloRepository.save(articulo);
-        }
+    private void sumarStock(ProductoDTO producto){
+        Articulo articulo = articuloRepository.findById(producto.getId()).get();
+        articulo.setStock(articulo.getStock() + producto.getCantidad());
+        articuloRepository.save(articulo);
     }
 
-    private Set<ProductoDTO> getProductosDTO(Set<Producto> productos){
+    private Set<ProductoDTO> getProductosDTO(List<Producto> productos){
         Set<ProductoDTO> productoDTOS = new HashSet<>();
         for(Producto producto : productos){
-            Optional<Articulo> articuloOptional = articuloRepository.findById(producto.getNroArticulo());
-            productoDTOS.add(ProductoMapper.getProductoDTO(articuloOptional.get(),producto));
+            productoDTOS.add(ProductoMapper.getProductoDTO(producto));
         }
         return productoDTOS;
     }
 
-    private Cuenta getCuentaByDniCliente(String dni) {
-
-        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dni);
-        if(optionalCliente.isPresent()){
-            Optional<Cuenta> optionalCuenta = cuentaRepository.findCuentaByIdUsuario(optionalCliente.get().getId());
-            Cuenta cuenta = (optionalCuenta.isPresent()?optionalCuenta.get():new Cuenta());
-            return cuenta;
-        }else{
-            return new Cuenta();
-        }
-
+    private List<PedidoDTO> getPedidosDTO(List<Pedido> pedidos){
+        return pedidos.stream()
+                .map( pedido -> PedidoMapper.getPedidoDTO(pedido, getProductosDTO(pedido.getProductos())))
+                .collect(Collectors.toList());
     }
 
 

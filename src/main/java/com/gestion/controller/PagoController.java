@@ -19,15 +19,13 @@ import java.util.Set;
 public class PagoController {
 
     private final PagoRepository repository;
-    private final VentaRepository ventaRepository;
     private final PedidoRepository pedidoRepository;
     private final CuentaRepository cuentaRepository;
     private final ClienteRepository clienteRepository;
 
     @Autowired
-    public PagoController(PagoRepository repository, VentaRepository ventaRepository, PedidoRepository pedidoRepository, CuentaRepository cuentaRepository, ClienteRepository clienteRepository) {
+    public PagoController(PagoRepository repository, PedidoRepository pedidoRepository, CuentaRepository cuentaRepository, ClienteRepository clienteRepository) {
         this.repository = repository;
-        this.ventaRepository = ventaRepository;
         this.pedidoRepository = pedidoRepository;
         this.cuentaRepository = cuentaRepository;
         this.clienteRepository = clienteRepository;
@@ -51,7 +49,7 @@ public class PagoController {
         Optional<Pedido> optionalPedido = pedidoRepository.findById(idPedido);
         if (optionalPedido.isPresent()){
             Pedido pedido = optionalPedido.get();
-            Double saldo = optionalPedido.get().getPrecioTotal() - pedido.getVenta().getTotalPagos();
+            Double saldo = optionalPedido.get().getPrecioTotal() - pedido.getTotalPagos();
             return new ResponseEntity<>(saldo, HttpStatus.OK);
 
         }else{
@@ -61,40 +59,29 @@ public class PagoController {
     }
 
     @PostMapping()
-    public ResponseEntity<Pago> crearPago(@RequestBody PagoDTO pagoDTO) {
+    public ResponseEntity<Pago> crearPago(@RequestBody Pago pago) {
         try {
-            Optional<Pedido> optionalPedido = pedidoRepository.findById(pagoDTO.getIdPedido());
             Pago nuevoPago = new Pago();
-            if (optionalPedido.isPresent()){
-                Venta venta = optionalPedido.get().getVenta();
                 nuevoPago = repository
-                        .save(new Pago(pagoDTO.getMonto(),pagoDTO.getFecha(),pagoDTO.getFormaPago(),pagoDTO.getDescuento(),venta));
+                        .save(new Pago(pago.getMonto(),pago.getFecha(),pago.getFormaPago(),pago.getDescuento(),pago.getPedido()));
                 //sumo el pago a las venta
-                Set<Pago> pagoSets = new HashSet<>();
-                if(venta.getPagos() !=null && !venta.getPagos().isEmpty()){
-                    pagoSets = venta.getPagos();
-                }
-                pagoSets.add(nuevoPago);
-                venta.setPagos(pagoSets);
-                ventaRepository.save(venta);
 
                 //sumo a la cuenta el pago
-                Cuenta cuenta = getCuentaByDniCliente(optionalPedido.get().getDniCliente());
+                Cuenta cuenta = getCuentaByDniCliente(pago.getPedido().getCliente().getDni());
                 cuenta.setSaldo(cuenta.getSaldo() + nuevoPago.getMonto());
                 cuentaRepository.save(cuenta);
 
                 //si la suma de pagos cancela el total del pedido, cambio el estado del pedido
                 double totalPagos = 0;
-                for (Pago pago : pagoSets){
-                    totalPagos += pago.getMonto();
+                for (Pago p : repository.findAllByPedido(pago.getPedido())){
+                    totalPagos += p.getMonto();
                 }
-                if (optionalPedido.get().getPrecioTotal()-totalPagos == 0){
-                    Pedido nuevoPedido = optionalPedido.get();
+                if (pago.getPedido().getPrecioTotal()-totalPagos == 0){
+                    Pedido nuevoPedido = pago.getPedido();
                     nuevoPedido.setEstado(3);
                     nuevoPedido.setEstadoTexto("PAGO");
                     pedidoRepository.save(nuevoPedido);
                 }
-            }
 
             return new ResponseEntity<>(nuevoPago, HttpStatus.CREATED);
         } catch (Exception e) {

@@ -1,9 +1,11 @@
 package com.gestion.controller;
 
+import com.gestion.dto.CompraDTO;
 import com.gestion.dto.CuentaDTO;
 import com.gestion.dto.GastoDTO;
 import com.gestion.model.*;
 import com.gestion.repository.*;
+import com.gestion.util.mappers.CompraMapper;
 import com.gestion.util.mappers.CuentaMapper;
 import com.gestion.util.mappers.GastoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,28 +43,38 @@ public class CuentaController {
     @RequestMapping("/{id}")
     public ResponseEntity<CuentaDTO> getCuenta(@PathVariable Long id) {
 
-        Optional<Cuenta> optionalCuenta = repository.findById(id);
-        CuentaDTO cuentaDTO = CuentaMapper.getCuentaDTO(optionalCuenta.get());
-        Optional<Cliente> optionalCliente = clienteRepository.findById(optionalCuenta.get().getIdUsuario());
+
+        CuentaDTO cuentaDTO = new CuentaDTO();
+        cuentaDTO.setId(id);
+        cuentaDTO.setIdUsuario(id);
+        Optional<Cliente> optionalCliente = clienteRepository.findById(id);
         if (optionalCliente.isPresent()){
-            List<Pedido> pedidos = pedidoRepository.findAllByDniClienteOrderByFechaDesc(optionalCliente.get().getDni());
+            List<Pedido> pedidos = pedidoRepository.findAllByClienteOrderByFechaDesc(optionalCliente.get());
             //seteo gastos
             List<GastoDTO> gastos = GastoMapper.getGastoDTOList(pedidos);
             cuentaDTO.setGastos(gastos);
             //seteo pagos
             List<List<Pago>> listPagos = new ArrayList<>();
             for(Pedido pedido : pedidos){
-                listPagos.add(pagoRepository.findAllByVenta(pedido.getVenta()));
+                listPagos.add(pagoRepository.findAllByPedido(pedido));
             }
             List<Pago> pagos = listPagos.stream().flatMap(List :: stream)
                     .collect(Collectors.toList());
             cuentaDTO.setPagos(pagos);
             cuentaDTO.setDniCliente(optionalCliente.get().getDni());
-
+            cuentaDTO.setSaldo(optionalCliente.get().getSaldo());
         }else {
-            Optional<Proveedor> optionalProveedor = proveedorRepository.findById(optionalCuenta.get().getIdUsuario());
+            Optional<Proveedor> optionalProveedor = proveedorRepository.findById(id);
             cuentaDTO.setDniCliente(optionalProveedor.get().getCuit());
-
+            List<CompraDTO> compras = new ArrayList<>();
+            for (Articulo articulo : optionalProveedor.get().getArticulos()){
+                List<Compra> comprasArt = compraRepository.findAllByArticuloOrderByFechaDesc(articulo);
+                for (Compra compra : comprasArt){
+                    compras.add(CompraMapper.getCompraDTO(compra));
+                }
+            }
+            cuentaDTO.setCompras(compras);
+            cuentaDTO.setSaldo(optionalProveedor.get().getSaldo());
         }
         return new ResponseEntity<>(cuentaDTO, HttpStatus.OK);
     }

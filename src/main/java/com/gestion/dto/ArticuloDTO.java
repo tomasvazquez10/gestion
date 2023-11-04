@@ -1,5 +1,7 @@
 package com.gestion.dto;
 
+import com.gestion.model.Proveedor;
+
 import javax.persistence.Column;
 
 public class ArticuloDTO {
@@ -8,6 +10,7 @@ public class ArticuloDTO {
     private String nombre;
     private Long nroArticulo;
     private String descripcion;
+    private Proveedor proveedor;
     private String cuitProveedor;
     private int stock;
     private Double precio;
@@ -66,12 +69,12 @@ public class ArticuloDTO {
         this.descripcion = descripcion;
     }
 
-    public String getCuitProveedor() {
-        return cuitProveedor;
+    public Proveedor getProveedor() {
+        return proveedor;
     }
 
-    public void setCuitProveedor(String cuitProveedor) {
-        this.cuitProveedor = cuitProveedor;
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
     }
 
     public int getStock() {
@@ -88,5 +91,13 @@ public class ArticuloDTO {
 
     public void setPrecio(Double precio) {
         this.precio = precio;
+    }
+
+    public String getCuitProveedor() {
+        return cuitProveedor;
+    }
+
+    public void setCuitProveedor(String cuitProveedor) {
+        this.cuitProveedor = cuitProveedor;
     }
 }

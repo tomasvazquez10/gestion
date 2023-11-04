@@ -1,6 +1,9 @@
 package com.gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "reparto")
@@ -18,6 +21,10 @@ public class Reparto {
     @Column
     private boolean activo;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "reparto")
+    private Set<Cliente> clientes;
+
     public Reparto(int nroReparto, String diaSemana, String zonaEntrega) {
         this.nroReparto = nroReparto;
         this.diaSemana = diaSemana;
@@ -26,6 +33,14 @@ public class Reparto {
     }
 
     public Reparto() {}
+
+    public Set<Cliente> getClientes() {
+        return clientes;
+    }
+
+    public void setClientes(Set<Cliente> clientes) {
+        this.clientes = clientes;
+    }
 
     public Long getId() {
         return id;

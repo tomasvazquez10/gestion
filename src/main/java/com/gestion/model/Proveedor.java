@@ -1,6 +1,9 @@
 package com.gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "proveedor")
@@ -23,6 +26,20 @@ public class Proveedor {
     private String telefono;
     @Column
     private boolean activo;
+    @Column
+    private double saldo;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "proveedor")
+    private Set<Articulo> articulos;
+
+    public Set<Articulo> getArticulos() {
+        return articulos;
+    }
+
+    public void setArticulos(Set<Articulo> articulos) {
+        this.articulos = articulos;
+    }
 
     public Proveedor(){}
 
@@ -34,6 +51,7 @@ public class Proveedor {
         this.direccion = direccion;
         this.telefono = telefono;
         this.activo = true;
+        this.saldo = 0;
     }
 
     public String getCuit() {
@@ -98,6 +116,14 @@ public class Proveedor {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public double getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(double saldo) {
+        this.saldo = saldo;
     }
 
     @Override

@@ -83,4 +83,5 @@ public class Compra {
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
     }
+
 }

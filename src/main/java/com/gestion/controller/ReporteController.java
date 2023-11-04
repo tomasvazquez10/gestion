@@ -26,35 +26,33 @@ import java.util.stream.Collectors;
 @RequestMapping("/reporte")
 public class ReporteController {
 
-    private final VentaRepository ventaRepository;
     private final PedidoRepository pedidoRepository;
     private final ClienteRepository clienteRepository;
     private final ArticuloRepository articuloRepository;
+    private final RepartoRepository repartoRepository;
 
 
     @Autowired
-    public ReporteController(VentaRepository ventaRepository, PedidoRepository pedidoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository) {
-        this.ventaRepository = ventaRepository;
+    public ReporteController(PedidoRepository pedidoRepository, ClienteRepository clienteRepository, ArticuloRepository articuloRepository, RepartoRepository repartoRepository) {
         this.pedidoRepository = pedidoRepository;
         this.clienteRepository = clienteRepository;
         this.articuloRepository = articuloRepository;
+        this.repartoRepository = repartoRepository;
     }
 
     @RequestMapping("/pagos/cliente/{dniCliente}")
     public ResponseEntity<List<PagoDTO>> getPagosByDniCliente(@PathVariable String dniCliente) {
 
+        List<Pedido> pedidos = new ArrayList<>();
+        Optional<Cliente> optionalCliente = clienteRepository.findClienteByDni(dniCliente);
+        if (optionalCliente.isPresent()){
+            pedidos = pedidoRepository.findAllByClienteOrderByFechaDesc(optionalCliente.get());
+        }
+        List<PagoDTO> pagos = new ArrayList<>();
 
-        List<Pedido> pedidos = pedidoRepository.findAllByDniClienteOrderByFechaDesc(dniCliente);
-        List<Venta> ventas = new ArrayList<>();
         pedidos.forEach(pedido -> {
-            Optional<Venta> optionalVenta = ventaRepository.findByPedido(pedido);
-            optionalVenta.ifPresent(ventas::add);
+            pedido.getPagos().forEach( pago -> pagos.add(PagoMapper.getPagoDTO(pago)));
         });
-
-        List<PagoDTO> pagos = ventas.stream()
-                .flatMap(venta -> venta.getPagos().stream().map( pago -> PagoMapper.getPagoDTO(pago, venta)
-                ))
-                .collect(Collectors.toList());
 
         return new ResponseEntity<>(pagos,HttpStatus.OK);
     }
@@ -63,21 +61,19 @@ public class ReporteController {
     public ResponseEntity<List<PagoDTO>> getPagosByNroReparto(@PathVariable int nroReparto) {
 
         //String diaSemana = DiaSemanaConverter.getDiaSemanaByFecha(fecha);
-        List<Venta> ventas = new ArrayList<>();
-        List<Cliente> clientes = clienteRepository.findByNroRepartoAndActivoTrue(nroReparto);
+        List<Reparto> repartos = repartoRepository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(nroReparto);
+        List<Cliente> clientes = new ArrayList<>();
+        if (!repartos.isEmpty()){
+            clientes = clienteRepository.findByRepartoAndActivoTrue(repartos.get(0));
+        }
         List<Pedido> pedidos = new ArrayList<>();
-        clientes.forEach(cliente -> pedidoRepository.findAllByDniClienteOrderByFechaDesc(cliente.getDni())
+        clientes.forEach(cliente -> pedidoRepository.findAllByClienteOrderByFechaDesc(cliente)
                 .forEach(pedido -> pedidos.add(pedido)));
 
+        List<PagoDTO> pagos = new ArrayList<>();
         pedidos.forEach(pedido -> {
-            Optional<Venta> optionalVenta = ventaRepository.findByPedido(pedido);
-            optionalVenta.ifPresent(ventas::add);
+            pedido.getPagos().forEach( pago -> pagos.add(PagoMapper.getPagoDTO(pago)));
         });
-
-        List<PagoDTO> pagos = ventas.stream()
-                .flatMap(venta -> venta.getPagos().stream().map( pago -> PagoMapper.getPagoDTO(pago, venta)
-                ))
-                .collect(Collectors.toList());
 
         return new ResponseEntity<>(pagos,HttpStatus.OK);
     }
@@ -170,6 +166,23 @@ public class ReporteController {
         }
     }
 
+    @PostMapping("/articulos/pdf")
+    public ResponseEntity<InputStreamResource> getArticulosPDF(@RequestBody List<ArticuloDTO> articulos){
+
+        ByteArrayInputStream bis = GeneratePDFReport.getArticuloDTOPDF(articulos);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=listado-articulos.pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(bis));
+
+
+    }
+
     private List<ArticuloDTO> getListaArticulosMasVendidos(List<Pedido> pedidos){
 
         try {
@@ -178,7 +191,7 @@ public class ReporteController {
                     .collect(Collectors.toList());
             Map<Long, Integer> articuloMap = new HashMap<>();
             for (Producto producto : productos) {
-                Long nroArticulo = producto.getNroArticulo();
+                Long nroArticulo = producto.getPk().getArticulo().getNroArticulo();
                 if (articuloMap.containsKey(nroArticulo)){
                     int cant = articuloMap.remove(nroArticulo);
                     articuloMap.put(nroArticulo,producto.getCantidad()+cant);

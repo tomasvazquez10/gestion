@@ -8,45 +8,30 @@ import javax.persistence.*;
 @Table(name = "PRODUCTOS")
 public class Producto {
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
-    @Column
-    private Long nroArticulo;
-    @Column
-    private int cantidad;
-    @Column
-    private Double precio;
-
+    @EmbeddedId
     @JsonIgnore
-    @ManyToOne()
-    @JoinColumn(name = "pedido_id", nullable = false)
-    private Pedido pedido;
+    private PedidoProductoPK pk;
 
-    public Producto(Long nroArticulo, int cantidad, Double precio, Pedido pedido) {
-        this.nroArticulo = nroArticulo;
+    @Column(nullable = false)
+    private int cantidad;
+
+
+    public Producto(Pedido pedido, Articulo articulo, int cantidad) {
+        pk = new PedidoProductoPK();
+        pk.setPedido(pedido);
+        pk.setArticulo(articulo);
         this.cantidad = cantidad;
-        this.precio = precio;
-        this.pedido = pedido;
     }
 
     public Producto() {
     }
 
-    public Long getId() {
-        return id;
+    public PedidoProductoPK getPk() {
+        return pk;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getNroArticulo() {
-        return nroArticulo;
-    }
-
-    public void setNroArticulo(Long nroArticulo) {
-        this.nroArticulo = nroArticulo;
+    public void setPk(PedidoProductoPK pk) {
+        this.pk = pk;
     }
 
     public int getCantidad() {
@@ -57,19 +42,5 @@ public class Producto {
         this.cantidad = cantidad;
     }
 
-    public Double getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(Double precio) {
-        this.precio = precio;
-    }
-
-    public Pedido getPedido() {
-        return pedido;
-    }
-
-    public void setPedido(Pedido pedido) {
-        this.pedido = pedido;
-    }
+    public Double getPrecioTotal() { return pk.getArticulo().getPrecio()*cantidad; }
 }

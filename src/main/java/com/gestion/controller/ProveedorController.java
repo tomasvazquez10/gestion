@@ -29,7 +29,12 @@ public class ProveedorController {
     public ResponseEntity<Proveedor> getProveedor(@PathVariable Long id) {
 
         Optional<Proveedor> optionalProveedor = repository.findById(id);
-        return new ResponseEntity<>(optionalProveedor.get(), HttpStatus.OK);
+        if (optionalProveedor.isPresent()){
+            return new ResponseEntity<>(optionalProveedor.get(), HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
     }
 
     @RequestMapping("/cuit/{cuit}")

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -12,52 +14,71 @@ import java.util.Set;
 public class Pedido {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     @Column
     private Date fecha;
     @Column
     private int estado;
-    @Column
-    private String dniCliente;
+
+    @ManyToOne()
+    @JoinColumn(name = "cliente_id", nullable = false)
+    private Cliente cliente;
     @Column
     private Double precioTotal;
 
     private String estadoTexto;
-    private String fechaStr;
 
-    //@JsonManagedReference
-    @OneToMany(mappedBy = "pedido")
-    private Set<Producto> productos;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "pk.pedido")
+    private List<Producto> productos = new ArrayList<>();
+
+    @Transient
+    public Double getTotalOrderPrice() {
+        double sum = 0D;
+        List<Producto> productos = getProductos();
+        for (Producto p : productos) {
+            sum += p.getPrecioTotal();
+        }
+        return sum;
+    }
+
+    @Transient
+    public Double getTotalPagos() {
+        double sum = 0D;
+        List<Pago> pagos = getPagos();
+        for (Pago p : pagos) {
+            sum += p.getMonto();
+        }
+        return sum;
+    }
+
+    @Transient
+    public int getCantidadProductos() {
+        return this.productos.size();
+    }
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinTable(name = "pedido_venta",
-            joinColumns =
-                    { @JoinColumn(name = "PEDIDO_id", referencedColumnName = "id") },
-            inverseJoinColumns =
-                    { @JoinColumn(name = "VENTA_id", referencedColumnName = "id") })
-    private Venta venta;
+    @OneToMany(mappedBy = "pedido")
+    private List<Pago> pagos;
 
-
-    public Pedido(Date fecha, int estado, String dniCliente, Double precioTotal, Set<Producto> productos) {
+    public Pedido(Date fecha, int estado, Cliente cliente, Double precioTotal) {
         this.fecha = fecha;
         this.estado = estado;
-        this.dniCliente = dniCliente;
+        this.cliente = cliente;
         this.precioTotal = precioTotal;
-        this.productos = productos;
         this.estadoTexto = "PENDIENTE";
     }
 
     public Pedido() {
     }
 
-    public Venta getVenta() {
-        return venta;
+    public List<Pago> getPagos() {
+        return pagos;
     }
 
-    public void setVenta(Venta venta) {
-        this.venta = venta;
+    public void setPagos(List<Pago> pagos) {
+        this.pagos = pagos;
     }
 
     public Long getId() {
@@ -84,20 +105,20 @@ public class Pedido {
         this.estado = estado;
     }
 
-    public Set<Producto> getProductos() {
+    public List<Producto> getProductos() {
         return productos;
     }
 
-    public void setProductos(Set<Producto> productos) {
+    public void setProductos(List<Producto> productos) {
         this.productos = productos;
     }
 
-    public String getDniCliente() {
-        return dniCliente;
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    public void setDniCliente(String dniCliente) {
-        this.dniCliente = dniCliente;
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
     public Double getPrecioTotal() {
@@ -114,11 +135,4 @@ public class Pedido {
         this.estadoTexto = estadoTexto;
     }
 
-    public String getFechaStr() {
-        return fechaStr;
-    }
-
-    public void setFechaStr(String fechaStr) {
-        this.fechaStr = fechaStr;
-    }
 }

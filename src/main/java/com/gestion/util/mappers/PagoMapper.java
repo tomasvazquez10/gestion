@@ -3,11 +3,10 @@ package com.gestion.util.mappers;
 
 import com.gestion.dto.PagoDTO;
 import com.gestion.model.Pago;
-import com.gestion.model.Venta;
 
 public class PagoMapper {
 
-    public static PagoDTO getPagoDTO(Pago pago, Venta venta){
+    public static PagoDTO getPagoDTO(Pago pago){
         PagoDTO pagoDTO = new PagoDTO();
 
         pagoDTO.setId(pago.getId());
@@ -15,8 +14,8 @@ public class PagoMapper {
         pagoDTO.setDescuento(pago.getDescuento());
         pagoDTO.setFecha(pago.getFecha());
         pagoDTO.setMonto(pago.getMonto());
-        pagoDTO.setDniCliente(venta.getPedido().getDniCliente());
-        pagoDTO.setIdPedido(venta.getPedido().getId());
+        pagoDTO.setDniCliente(pago.getPedido().getCliente().getDni());
+        pagoDTO.setIdPedido(pago.getPedido().getId());
 
         return pagoDTO;
     }

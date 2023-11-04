@@ -10,17 +10,22 @@ public class PrecioArticulo {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
-    @Column
-    private Long idArticulo;
+
+    @ManyToOne()
+    @JoinColumn(name = "articulo_id", nullable = false)
+    private Articulo articulo;
     @Column
     private Date fecha;
     @Column
     private Double precio;
+    @Column
+    private boolean activo;
 
-    public PrecioArticulo(Long idArticulo, Date fecha, Double precio) {
-        this.idArticulo = idArticulo;
+    public PrecioArticulo(Articulo articulo, Date fecha, Double precio) {
+        this.articulo = articulo;
         this.fecha = fecha;
         this.precio = precio;
+        this.activo = true;
     }
 
     public PrecioArticulo() {
@@ -34,12 +39,12 @@ public class PrecioArticulo {
         this.id = id;
     }
 
-    public Long getIdArticulo() {
-        return idArticulo;
+    public Articulo getArticulo() {
+        return articulo;
     }
 
-    public void setIdArticulo(Long idArticulo) {
-        this.idArticulo = idArticulo;
+    public void setArticulo(Articulo articulo) {
+        this.articulo = articulo;
     }
 
     public Date getFecha() {
@@ -58,11 +63,19 @@ public class PrecioArticulo {
         this.precio = precio;
     }
 
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
     @Override
     public String toString() {
         return "PrecioArticulo{" +
                 "id=" + id +
-                ", idArticulo=" + idArticulo +
+                ", idArticulo=" + articulo.getId() +
                 ", fecha=" + fecha +
                 ", precio=" + precio +
                 '}';

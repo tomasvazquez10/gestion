@@ -1,6 +1,7 @@
 package com.gestion.repository;
 
 import com.gestion.model.Cliente;
+import com.gestion.model.Reparto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    List<Cliente> findByNroRepartoAndActivoTrue(int nroReparto);
+    List<Cliente> findByRepartoAndActivoTrue(Reparto reparto);
 
     Optional<Cliente> findClienteByDni(String dni);
 

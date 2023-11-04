@@ -20,19 +20,20 @@ public class Pago {
     private String formaPago;
     @Column
     private int descuento;
+
     @JsonIgnore
     @ManyToOne()
-    @JoinColumn(name = "venta_id")
-    private Venta venta;
+    @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
 
     public Pago(){};
 
-    public Pago(Double monto, Date fecha, String formaPago, int descuento, Venta venta) {
+    public Pago(Double monto, Date fecha, String formaPago, int descuento, Pedido pedido) {
         this.monto = monto;
         this.fecha = fecha;
         this.formaPago = formaPago;
         this.descuento = descuento;
-        this.venta = venta;
+        this.pedido = pedido;
     }
 
     public Long getId() {
@@ -43,12 +44,12 @@ public class Pago {
         this.id = id;
     }
 
-    public void setVenta(Venta venta) {
-        this.venta = venta;
+    public Pedido getPedido() {
+        return pedido;
     }
 
-    public Venta getVenta() {
-        return venta;
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
     }
 
     public double getMonto() {

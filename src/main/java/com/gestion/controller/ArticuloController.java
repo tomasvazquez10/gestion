@@ -3,8 +3,10 @@ package com.gestion.controller;
 import com.gestion.dto.ArticuloDTO;
 import com.gestion.model.Articulo;
 import com.gestion.model.PrecioArticulo;
+import com.gestion.model.Proveedor;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.PrecioArticuloRepository;
+import com.gestion.repository.ProveedorRepository;
 import com.gestion.util.GeneratePDFReport;
 import com.gestion.util.mappers.ArticuloMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,20 +31,21 @@ public class ArticuloController {
 
     private final ArticuloRepository repository;
     private final PrecioArticuloRepository precioArticuloRepository;
+    private final ProveedorRepository proveedorRepository;
 
     @Autowired
-    public ArticuloController(ArticuloRepository repository, PrecioArticuloRepository precioArticuloRepository) {
+    public ArticuloController(ArticuloRepository repository, PrecioArticuloRepository precioArticuloRepository, ProveedorRepository proveedorRepository) {
         this.repository = repository;
         this.precioArticuloRepository = precioArticuloRepository;
+        this.proveedorRepository = proveedorRepository;
     }
 
     @RequestMapping("/{id}")
     public ResponseEntity<ArticuloDTO> getArticulo(@PathVariable Long id) {
 
         Optional<Articulo> optionalArticulo = repository.findById(id);
-        PrecioArticulo precioArticulo = getPrecioArticuloByNroArticulo(id);
         if (optionalArticulo.isPresent()){
-            ArticuloDTO articuloDTO = ArticuloMapper.getArticuloDTO(optionalArticulo.get(),precioArticulo);
+            ArticuloDTO articuloDTO = ArticuloMapper.getArticuloDTO(optionalArticulo.get());
             return new ResponseEntity<>(articuloDTO, HttpStatus.OK);
         }else{
             return new ResponseEntity<>(new ArticuloDTO(),HttpStatus.NOT_FOUND);
@@ -64,15 +67,19 @@ public class ArticuloController {
 
     @PostMapping()
     public ResponseEntity<ArticuloDTO> crearArticulo(@RequestBody ArticuloDTO articuloDTO) {
+
         try {
+            Optional<Proveedor> optionalProveedor = proveedorRepository.findProveedorByCuit(articuloDTO.getCuitProveedor());
+            optionalProveedor.ifPresent(articuloDTO::setProveedor);
             Articulo nuevoArticulo = repository
                     .save(new Articulo(articuloDTO.getNombre(),
                             articuloDTO.getDescripcion(),
                             articuloDTO.getNroArticulo(),
-                            articuloDTO.getCuitProveedor(),
+                            articuloDTO.getProveedor(),
+                            articuloDTO.getPrecio(),
                             articuloDTO.getStock()));
-            PrecioArticulo precioArticulo = precioArticuloRepository.save(new PrecioArticulo(nuevoArticulo.getId(), new Date(), articuloDTO.getPrecio()));
-            return new ResponseEntity<>(ArticuloMapper.getArticuloDTO(nuevoArticulo,precioArticulo), HttpStatus.CREATED);
+            precioArticuloRepository.save(new PrecioArticulo(nuevoArticulo, new Date(), articuloDTO.getPrecio()));
+            return new ResponseEntity<>(ArticuloMapper.getArticuloDTO(nuevoArticulo), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -83,16 +90,13 @@ public class ArticuloController {
         try {
             List<Articulo> articulos = repository.findAll().stream()
                     .filter(Articulo::isActivo)
-                    .collect(Collectors.toList());;
+                    .collect(Collectors.toList());
 
             if (articulos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            List<ArticuloDTO> articuloDTOS = new ArrayList<>();
-            for (Articulo articulo: articulos) {
-                articuloDTOS.add(ArticuloMapper.getArticuloDTO(articulo,getPrecioArticuloByNroArticulo(articulo.getId())));
-            }
-            return new ResponseEntity<>(articuloDTOS, HttpStatus.OK);
+
+            return new ResponseEntity<>(getArticulosDTO(articulos), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -111,22 +115,23 @@ public class ArticuloController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<Articulo> editArticulo(@RequestBody Articulo newArticulo) {
+    public ResponseEntity<Articulo> editArticulo(@RequestBody ArticuloDTO newArticulo) {
+        Optional<Proveedor> optionalProveedor = proveedorRepository.findProveedorByCuit(newArticulo.getCuitProveedor());
         return repository.findById(newArticulo.getId())
                 .map(articulo -> {
                     articulo.setNombre(newArticulo.getNombre());
                     articulo.setDescripcion(newArticulo.getDescripcion());
-                    articulo.setCuitProveedor(newArticulo.getCuitProveedor());
+                    articulo.setProveedor(optionalProveedor.get());
                     articulo.setStock(newArticulo.getStock());
                     articulo.setNroArticulo(newArticulo.getNroArticulo());
                     articulo.setActivo(true);
                     return new ResponseEntity<>(repository.save(articulo), HttpStatus.OK);
                 })
-                .orElseGet(() -> new ResponseEntity<>(repository.save(newArticulo), HttpStatus.CREATED));
+                .orElseGet(() -> new ResponseEntity<>(repository.save(ArticuloMapper.getArticulo(newArticulo)), HttpStatus.CREATED));
     }
 
     @RequestMapping("/buscar/{campo}/{value}")
-    public ResponseEntity<List<Articulo>> findArticulosBy(@PathVariable String campo, @PathVariable String value) {
+    public ResponseEntity<List<ArticuloDTO>> findArticulosBy(@PathVariable String campo, @PathVariable String value) {
         try{
             List<Articulo> articulos = new ArrayList<>();
             switch (campo){
@@ -134,18 +139,29 @@ public class ArticuloController {
                     articulos = repository.findAllByNombreStartingWithIgnoreCaseAndActivoTrue(value);
                     break;
                 case "cuit":
-                    articulos = repository.findAllByCuitProveedorStartingWithAndActivoTrue(value);
+                    Optional<Proveedor> optionalProveedor = proveedorRepository.findProveedorByCuit(value);
+                    if (optionalProveedor.isPresent()){
+                        articulos = repository.findAllByProveedorAndActivoTrue(optionalProveedor.get());
+                    }else {
+                        articulos = new ArrayList<>();
+                    }
+
                     break;
                 default:
                     articulos = new ArrayList<>();
             }
-            return new ResponseEntity<>(articulos,HttpStatus.OK);
+            return new ResponseEntity<>(getArticulosDTO(articulos),HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
         }
     }
+
     private PrecioArticulo getPrecioArticuloByNroArticulo(Long nroArticulo){
-        List<PrecioArticulo> precioArticuloList = precioArticuloRepository.getPrecioArticuloByIdArticuloOrderByFechaDesc(nroArticulo);
+        Optional<Articulo> optionalArticulo = repository.findArticuloByNroArticulo(nroArticulo);
+        List<PrecioArticulo> precioArticuloList = new ArrayList<>();
+        if (optionalArticulo.isPresent()){
+            precioArticuloList = precioArticuloRepository.getPrecioArticuloByArticuloOrderByFechaDesc(optionalArticulo.get());
+        }
         if (precioArticuloList.isEmpty()){
             return new PrecioArticulo();
         }else{
@@ -165,5 +181,11 @@ public class ArticuloController {
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(new InputStreamResource(bis));
+    }
+
+    private List<ArticuloDTO> getArticulosDTO(List<Articulo> articulos){
+        return articulos.stream()
+                .map(ArticuloMapper::getArticuloDTO)
+                .collect(Collectors.toList());
     }
 }

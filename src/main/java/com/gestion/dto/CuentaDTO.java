@@ -1,5 +1,6 @@
 package com.gestion.dto;
 
+import com.gestion.model.Compra;
 import com.gestion.model.Pago;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public class CuentaDTO {
     private double saldo;
     private String dniCliente;
     private List<Pago> pagos;
+    private List<CompraDTO> compras;
     private List<GastoDTO> gastos;
 
     public CuentaDTO() {}
@@ -61,5 +63,13 @@ public class CuentaDTO {
 
     public void setGastos(List<GastoDTO> gastos) {
         this.gastos = gastos;
+    }
+
+    public List<CompraDTO> getCompras() {
+        return compras;
+    }
+
+    public void setCompras(List<CompraDTO> compras) {
+        this.compras = compras;
     }
 }

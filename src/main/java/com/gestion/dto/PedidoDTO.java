@@ -11,6 +11,7 @@ public class PedidoDTO {
 
     private Long id;
     private Date fecha;
+    private String fechaStr;
     private String dniCliente;
     private Double precioTotal;
     private String estadoTexto;
@@ -64,5 +65,13 @@ public class PedidoDTO {
 
     public void setProductos(Set<ProductoDTO> productos) {
         this.productos = productos;
+    }
+
+    public String getFechaStr() {
+        return fechaStr;
+    }
+
+    public void setFechaStr(String fechaStr) {
+        this.fechaStr = fechaStr;
     }
 }

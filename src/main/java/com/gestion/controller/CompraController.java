@@ -129,21 +129,10 @@ public class CompraController {
             articuloRepository.save(articulo);
             nuevaCompra.setArticulo(articulo);
 
-            //busco la cuenta del proveedor y le sumo el total de la compra a favor
-            Optional<Proveedor> optionalProveedor = proveedorRepository.findProveedorByCuit(articulo.getCuitProveedor());
-            Optional<Cuenta> optionalCuenta = cuentaRepository.findCuentaByIdUsuario(optionalProveedor.get().getId());
-            if (optionalCuenta.isPresent()){
-                //sumo al saldo el total
-                Cuenta cuenta = optionalCuenta.get();
-                cuenta.setSaldo(cuenta.getSaldo() + (compra.getCantidad() * compra.getPrecioUnidad()));
-                cuentaRepository.save(cuenta);
-            }else {
-                //creo cuenta
-                Cuenta nuevaCuenta = new Cuenta();
-                nuevaCuenta.setIdUsuario(optionalProveedor.get().getId());
-                nuevaCuenta.setSaldo(compra.getPrecioUnidad() * compra.getCantidad());
-                cuentaRepository.save(nuevaCuenta);
-            }
+            //sumo total al saldo de proveedor
+            Proveedor proveedor = articulo.getProveedor();
+            proveedor.setSaldo(proveedor.getSaldo() + compra.getCantidad()* compra.getPrecioUnidad());
+            proveedorRepository.save(proveedor);
 
             return new ResponseEntity<>(nuevaCompra, HttpStatus.CREATED);
         } catch (Exception e) {

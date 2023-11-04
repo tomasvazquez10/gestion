@@ -1,5 +1,6 @@
 package com.gestion.util;
 
+import com.gestion.dto.ArticuloDTO;
 import com.gestion.dto.FacturaDTO;
 import com.gestion.dto.PagoDTO;
 import com.gestion.model.*;
@@ -58,6 +59,88 @@ public class GeneratePDFReport {
                 table.addCell(cell);
 
                 cell = new PdfPCell(new Phrase(articulo.getDescripcion()));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setPaddingRight(5);
+                table.addCell(cell);
+            }
+
+            PdfWriter.getInstance(document, out);
+            document.open();
+            document.add(table);
+
+            document.close();
+
+        } catch (DocumentException ex) {
+
+
+        }
+
+        return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    public static ByteArrayInputStream getArticuloDTOPDF(List<ArticuloDTO> articulos) {
+
+        Document document = new Document();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+
+            PdfPTable table = new PdfPTable(5);
+            table.setWidthPercentage(60);
+            table.setWidths(new int[]{1, 3, 5, 3, 3});
+
+            Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+
+            PdfPCell hcell;
+            hcell = new PdfPCell(new Phrase("Id", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Nombre", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Descripcion", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Stock", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Ventas", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            for (ArticuloDTO articulo : articulos) {
+
+                PdfPCell cell;
+
+                cell = new PdfPCell(new Phrase(articulo.getId().toString()));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(articulo.getNombre()));
+                cell.setPaddingLeft(5);
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(articulo.getDescripcion()));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setPaddingRight(5);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(Integer.toString(articulo.getStock())));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setPaddingRight(5);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(Integer.toString(articulo.getVentasTotales())));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                 cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
                 cell.setPaddingRight(5);
@@ -168,7 +251,7 @@ public class GeneratePDFReport {
                 cell.setHorizontalAlignment(Element.ALIGN_LEFT);
                 table.addCell(cell);
 
-                cell = new PdfPCell(new Phrase(Integer.toString(cliente.getNroReparto())));
+                cell = new PdfPCell(new Phrase(Integer.toString(cliente.getReparto().getNroReparto())));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                 cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 table.addCell(cell);
@@ -188,7 +271,7 @@ public class GeneratePDFReport {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    public static ByteArrayInputStream getPedidoPDF(Pedido pedido, Venta venta) {
+    public static ByteArrayInputStream getPedidoPDF(Pedido pedido) {
 
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -230,7 +313,7 @@ public class GeneratePDFReport {
             cell.setHorizontalAlignment(Element.ALIGN_LEFT);
             table.addCell(cell);
 
-            cell = new PdfPCell(new Phrase(pedido.getDniCliente()));
+            cell = new PdfPCell(new Phrase(pedido.getCliente().getDni()));
             cell.setPaddingLeft(5);
             cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             cell.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -259,7 +342,7 @@ public class GeneratePDFReport {
             hcell2.setHorizontalAlignment(Element.ALIGN_CENTER);
             table2.addCell(hcell2);
 
-            for (Pago pago : venta.getPagos()) {
+            for (Pago pago : pedido.getPagos()) {
 
                 PdfPCell cell2;
 

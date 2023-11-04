@@ -1,11 +1,11 @@
 package com.gestion.controller;
 
-import com.gestion.dto.ArticuloDTO;
-import com.gestion.model.Articulo;
+import com.gestion.dto.ClienteDTO;
 import com.gestion.model.Cliente;
-import com.gestion.model.Proveedor;
+import com.gestion.model.Reparto;
+import com.gestion.repository.RepartoRepository;
 import com.gestion.util.GeneratePDFReport;
-import com.gestion.util.mappers.ArticuloMapper;
+import com.gestion.util.mappers.ClienteMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -28,18 +28,25 @@ import java.util.stream.Collectors;
 public class ClienteController {
 
     private final ClienteRepository repository;
+    private final RepartoRepository repartoRepository;
 
     @Autowired
-    public ClienteController(ClienteRepository repository){
+    public ClienteController(ClienteRepository repository, RepartoRepository repartoRepository){
         this.repository = repository;
+        this.repartoRepository = repartoRepository;
     }
 
 
     @RequestMapping("/{id}")
-    public ResponseEntity<Cliente> getCliente(@PathVariable Long id) {
+    public ResponseEntity<ClienteDTO> getCliente(@PathVariable Long id) {
 
         Optional<Cliente> optCliente = repository.findById(id);
-        return new ResponseEntity<>(optCliente.get(),HttpStatus.OK);
+        if (optCliente.isPresent()){
+            return new ResponseEntity<>(ClienteMapper.getClienteDTO(optCliente.get()),HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
     }
 
     @RequestMapping("/dni/{dni}")
@@ -55,7 +62,7 @@ public class ClienteController {
     }
 
     @RequestMapping("/buscar/{campo}/{value}")
-    public ResponseEntity<List<Cliente>> findClientesBy(@PathVariable String campo, @PathVariable String value) {
+    public ResponseEntity<List<ClienteDTO>> findClientesBy(@PathVariable String campo, @PathVariable String value) {
         try{
             List<Cliente> clientes = new ArrayList<>();
             switch (campo){
@@ -66,7 +73,13 @@ public class ClienteController {
                     clientes = repository.findAllByNombreFantasiaStartingWithIgnoreCaseAndActivoTrue(value);
                     break;
                 case "nro_reparto":
-                    clientes = repository.findByNroRepartoAndActivoTrue(Integer.parseInt(value));
+                    List<Reparto> repartos = repartoRepository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(Integer.parseInt(value));
+                    if (!repartos.isEmpty()){
+                        clientes = repository.findByRepartoAndActivoTrue(repartos.get(0));
+                    }else{
+                        clientes = new ArrayList<>();
+                    }
+
                     break;
                 case "dni":
                     clientes = repository.findAllByDniStartingWithAndActivoTrue(value);
@@ -74,15 +87,16 @@ public class ClienteController {
                 default:
                     clientes = new ArrayList<>();
             }
-            return new ResponseEntity<>(clientes,HttpStatus.OK);
+            return new ResponseEntity<>(getClientesDTO(clientes),HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping()
-    public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> crearCliente(@RequestBody ClienteDTO cliente) {
         try {
+            List<Reparto> repartos = repartoRepository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(cliente.getNroReparto());
             Cliente nuevoCliente = repository
                     .save(new Cliente(cliente.getDni(),
                             cliente.getNombre(),
@@ -90,7 +104,7 @@ public class ClienteController {
                             cliente.getEmail(),
                             cliente.getDireccion(),
                             cliente.getTelefono(),
-                            cliente.getNroReparto()));
+                            repartos.get(0)));
 
             return new ResponseEntity<>(nuevoCliente, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -99,13 +113,9 @@ public class ClienteController {
     }
 
     @RequestMapping("/all")
-    public ResponseEntity<List<Cliente>> getClientes(){
+    public ResponseEntity<List<ClienteDTO>> getClientes(){
         try {
-            List<Cliente> clientes = new ArrayList<>();
-            clientes = repository.findAll().stream()
-                    .filter(Cliente::isActivo)
-                    .collect(Collectors.toList());
-
+            List<ClienteDTO> clientes = getClientesDTO(repository.findAll());
 
             if (clientes.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -127,7 +137,7 @@ public class ClienteController {
                     cliente.setDireccion(newCliente.getDireccion());
                     cliente.setEmail(newCliente.getEmail());
                     cliente.setTelefono(newCliente.getTelefono());
-                    cliente.setNroReparto(newCliente.getNroReparto());
+                    cliente.setReparto(newCliente.getReparto());
                     cliente.setDni(newCliente.getDni());
                     return new ResponseEntity<>(repository.save(cliente), HttpStatus.CREATED);
                 })
@@ -156,7 +166,7 @@ public class ClienteController {
                     proveedor.setEmail(newCliente.getEmail());
                     proveedor.setTelefono(newCliente.getTelefono());
                     proveedor.setDni(newCliente.getDni());
-                    proveedor.setNroReparto(newCliente.getNroReparto());
+                    proveedor.setReparto(newCliente.getReparto());
                     return new ResponseEntity<>(repository.save(proveedor), HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newCliente), HttpStatus.CREATED));
@@ -177,5 +187,11 @@ public class ClienteController {
                     .body(new InputStreamResource(bis));
 
 
+    }
+
+    private List<ClienteDTO> getClientesDTO(List<Cliente> clientes){
+        return clientes.stream().filter(Cliente::isActivo)
+                .map(ClienteMapper::getClienteDTO)
+                .collect(Collectors.toList());
     }
 }

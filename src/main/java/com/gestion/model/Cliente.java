@@ -1,6 +1,10 @@
 package com.gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "cliente")
@@ -22,21 +26,31 @@ public class Cliente {
     @Column
     private String telefono;
     @Column
-    private int nroReparto;
+    private double saldo;
+
+    @ManyToOne()
+    @JoinColumn(name = "reparto_id", nullable = false)
+    private Reparto reparto;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "cliente")
+    private List<Pedido> pedidos = new ArrayList<>();
+
     @Column
     private boolean activo;
 
     public Cliente(){}
 
-    public Cliente(String dni, String nombre, String nombreFantasia, String email, String direccion, String telefono, int nroReparto) {
+    public Cliente(String dni, String nombre, String nombreFantasia, String email, String direccion, String telefono, Reparto reparto) {
         this.dni = dni;
         this.nombre = nombre;
         this.nombreFantasia = nombreFantasia;
         this.email = email;
         this.direccion = direccion;
         this.telefono = telefono;
-        this.nroReparto = nroReparto;
+        this.reparto = reparto;
         this.activo = true;
+        this.saldo = 0;
     }
 
     public String getDni() {
@@ -95,12 +109,12 @@ public class Cliente {
         this.telefono = telefono;
     }
 
-    public int getNroReparto() {
-        return nroReparto;
+    public Reparto getReparto() {
+        return reparto;
     }
 
-    public void setNroReparto(int nroReparto) {
-        this.nroReparto = nroReparto;
+    public void setReparto(Reparto reparto) {
+        this.reparto = reparto;
     }
 
     public boolean isActivo() {
@@ -109,6 +123,14 @@ public class Cliente {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public double getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(double saldo) {
+        this.saldo = saldo;
     }
 
     @Override
@@ -121,7 +143,7 @@ public class Cliente {
                 ", email='" + email + '\'' +
                 ", direccion='" + direccion + '\'' +
                 ", telefono='" + telefono + '\'' +
-                ", nroReparto=" + nroReparto +
+                ", nroReparto=" + reparto.getNroReparto() +
                 '}';
     }
 }

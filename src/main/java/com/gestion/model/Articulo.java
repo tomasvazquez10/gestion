@@ -17,8 +17,10 @@ public class Articulo implements Serializable {
     private String nombre;
     @Column
     private String descripcion;
-    @Column
-    private String cuitProveedor;
+
+    @ManyToOne()
+    @JoinColumn(name = "proveedor_id", nullable = false)
+    private Proveedor proveedor;
     @Column
     private int stock;
     @Column
@@ -28,23 +30,39 @@ public class Articulo implements Serializable {
     @OneToMany(mappedBy = "articulo")
     private Set<Compra> compras;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "articulo")
+    private Set<PrecioArticulo> precios;
+
     @Column
     private Long nroArticulo;
 
-    public Articulo(String nombre, String descripcion, String cuitProveedor) {
+    @Column
+    private double precio;
+
+    public Set<PrecioArticulo> getPrecios() {
+        return precios;
+    }
+
+    public void setPrecios(Set<PrecioArticulo> precios) {
+        this.precios = precios;
+    }
+
+    public Articulo(String nombre, String descripcion, Proveedor proveedor) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.cuitProveedor = cuitProveedor;
+        this.proveedor = proveedor;
         activo = true;
         stock = 0;
     }
 
-    public Articulo(String nombre, String descripcion, Long nroArticulo, String cuitProveedor, int stock) {
+    public Articulo(String nombre, String descripcion, Long nroArticulo, Proveedor proveedor, double precio, int stock) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.cuitProveedor = cuitProveedor;
+        this.proveedor = proveedor;
         activo = true;
         this.stock = stock;
+        this.precio = precio;
         this.nroArticulo = nroArticulo;
     }
 
@@ -83,12 +101,12 @@ public class Articulo implements Serializable {
         this.descripcion = descripcion;
     }
 
-    public String getCuitProveedor() {
-        return cuitProveedor;
+    public Proveedor getProveedor() {
+        return proveedor;
     }
 
-    public void setCuitProveedor(String cuitProveedor) {
-        this.cuitProveedor = cuitProveedor;
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
     }
 
     public int getStock() {
@@ -115,13 +133,21 @@ public class Articulo implements Serializable {
         this.compras = compras;
     }
 
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
+    }
+
     @Override
     public String toString() {
         return "Articulo{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
                 ", descripcion='" + descripcion + '\'' +
-                ", cuitProveedor='" + cuitProveedor + '\'' +
+                ", cuitProveedor='" + proveedor.getCuit() + '\'' +
                 ", activo=" + activo +
                 '}';
     }
