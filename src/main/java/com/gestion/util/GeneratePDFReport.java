@@ -1,8 +1,6 @@
 package com.gestion.util;
 
-import com.gestion.dto.ArticuloDTO;
-import com.gestion.dto.FacturaDTO;
-import com.gestion.dto.PagoDTO;
+import com.gestion.dto.*;
 import com.gestion.model.*;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
@@ -87,8 +85,8 @@ public class GeneratePDFReport {
         try {
 
             PdfPTable table = new PdfPTable(5);
-            table.setWidthPercentage(60);
-            table.setWidths(new int[]{1, 3, 5, 3, 3});
+            table.setWidthPercentage(80);
+            table.setWidths(new int[]{2, 3, 5, 3, 3});
 
             Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
 
@@ -149,6 +147,7 @@ public class GeneratePDFReport {
 
             PdfWriter.getInstance(document, out);
             document.open();
+            addTitlePage(document, "Listado de Articulos mas vendidos");
             document.add(table);
 
             document.close();
@@ -161,7 +160,7 @@ public class GeneratePDFReport {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    public static ByteArrayInputStream getClientesPDF(List<Cliente> clientes) {
+    public static ByteArrayInputStream getClientesPDF(List<ClienteDTO> clientes) {
 
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -170,7 +169,7 @@ public class GeneratePDFReport {
 
             PdfPTable table = new PdfPTable(8);
             table.setWidthPercentage(98);
-            table.setWidths(new int[]{1, 3, 3, 3, 3, 3, 3, 3});
+            table.setWidths(new int[]{2, 3, 3, 3, 3, 4, 4, 2});
 
             Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
 
@@ -207,7 +206,7 @@ public class GeneratePDFReport {
             hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(hcell);
 
-            for (Cliente cliente : clientes) {
+            for (ClienteDTO cliente : clientes) {
 
                 PdfPCell cell;
 
@@ -251,7 +250,7 @@ public class GeneratePDFReport {
                 cell.setHorizontalAlignment(Element.ALIGN_LEFT);
                 table.addCell(cell);
 
-                cell = new PdfPCell(new Phrase(Integer.toString(cliente.getReparto().getNroReparto())));
+                cell = new PdfPCell(new Phrase(Integer.toString(cliente.getNroReparto())));
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                 cell.setHorizontalAlignment(Element.ALIGN_CENTER);
                 table.addCell(cell);
@@ -259,6 +258,7 @@ public class GeneratePDFReport {
 
             PdfWriter.getInstance(document, out);
             document.open();
+            addTitlePage(document, "Listado de Clientes");
             document.add(table);
 
             document.close();
@@ -386,7 +386,7 @@ public class GeneratePDFReport {
 
             PdfPTable table = new PdfPTable(6);
             table.setWidthPercentage(98);
-            table.setWidths(new int[]{1, 3, 3, 3, 3, 3});
+            table.setWidths(new int[]{1, 3, 3, 4, 2, 3});
 
             Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
 
@@ -458,11 +458,93 @@ public class GeneratePDFReport {
             PdfWriter.getInstance(document, out);
             document.open();
             document.addTitle("Listado de Pagos");
+            addTitlePage(document, "Listado de Pagos");
             document.add(table);
             document.close();
 
         } catch (DocumentException ex) {
+            System.out.println("Error");
+        }
+        return new ByteArrayInputStream(out.toByteArray());
+    }
 
+    public static ByteArrayInputStream getPedidosPDF(List<PedidoDTO> pedidos) {
+
+        Document document = new Document();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+
+            PdfPTable table = new PdfPTable(5);
+            table.setWidthPercentage(98);
+            table.setWidths(new int[]{2, 3, 3, 3, 3});
+
+            Font headFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+
+            PdfPCell hcell;
+            hcell = new PdfPCell(new Phrase("Numero", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Fecha", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Estado", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("DNI", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            hcell = new PdfPCell(new Phrase("Total", headFont));
+            hcell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(hcell);
+
+            for (PedidoDTO pedidoDTO : pedidos) {
+
+                PdfPCell cell;
+
+                cell = new PdfPCell(new Phrase(pedidoDTO.getId().toString()));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(cell);
+
+                String strDate = dateFormat.format(pedidoDTO.getFecha());
+                cell = new PdfPCell(new Phrase(strDate));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                cell.setPaddingRight(5);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(pedidoDTO.getEstadoTexto()));
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase(pedidoDTO.getDniCliente()));
+                cell.setPaddingLeft(5);
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                table.addCell(cell);
+
+                cell = new PdfPCell(new Phrase("$"+(pedidoDTO.getPrecioTotal())));
+                cell.setPaddingLeft(5);
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                table.addCell(cell);
+            }
+
+            PdfWriter.getInstance(document, out);
+            document.open();
+            document.addTitle("Listado de Pedidos");
+            addTitlePage(document, "Listado de Pedidos");
+            document.add(table);
+            document.close();
+
+        } catch (DocumentException ex) {
+            System.out.println("Error");
         }
         return new ByteArrayInputStream(out.toByteArray());
     }
@@ -474,5 +556,25 @@ public class GeneratePDFReport {
         facturaPDF.setDocument(new Document());
 
         return facturaPDF.createPdf();
+    }
+
+    private static Document addTitlePage(Document document, String titulo) throws DocumentException {
+        Paragraph preface = new Paragraph();
+        // We add one empty line
+        addEmptyLine(preface, 1);
+
+        document.add(preface);
+
+        preface = new Paragraph(titulo);
+        preface.setAlignment(Element.ALIGN_CENTER);
+        addEmptyLine(preface, 2);
+        document.add(preface);
+        return document;
+    }
+
+    private static void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
+        }
     }
 }

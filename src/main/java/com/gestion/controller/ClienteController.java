@@ -173,7 +173,7 @@ public class ClienteController {
     }
 
     @PostMapping("/pdf")
-    public ResponseEntity<InputStreamResource> getListadoPDF(@RequestBody List<Cliente> clientes){
+    public ResponseEntity<InputStreamResource> getListadoPDF(@RequestBody List<ClienteDTO> clientes){
 
             ByteArrayInputStream bis = GeneratePDFReport.getClientesPDF(clientes);
 

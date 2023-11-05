@@ -187,6 +187,23 @@ public class ReporteController {
 
     }
 
+    @PostMapping("/pedidos/pdf")
+    public ResponseEntity<InputStreamResource> getPedidosPDF(@RequestBody List<PedidoDTO> pedidos){
+
+        ByteArrayInputStream bis = GeneratePDFReport.getPedidosPDF(pedidos);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "inline; filename=listado-pedidos.pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(bis));
+
+
+    }
+
     private List<ArticuloDTO> getListaArticulosMasVendidos(List<Pedido> pedidos){
 
         try {
@@ -195,7 +212,7 @@ public class ReporteController {
                     .collect(Collectors.toList());
             Map<Long, Integer> articuloMap = new HashMap<>();
             for (Producto producto : productos) {
-                Long nroArticulo = producto.getPk().getArticulo().getNroArticulo();
+                Long nroArticulo = producto.getPk().getArticulo().getId();
                 if (articuloMap.containsKey(nroArticulo)){
                     int cant = articuloMap.remove(nroArticulo);
                     articuloMap.put(nroArticulo,producto.getCantidad()+cant);

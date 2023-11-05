@@ -200,7 +200,7 @@ public class PedidoController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<Pedido> editPedido(@RequestBody PedidoDTO newPedido) {
+    public ResponseEntity<PedidoDTO> editPedido(@RequestBody PedidoDTO newPedido) {
         return repository.findById(newPedido.getId())
                 .map(pedido -> {
                     pedido.setFecha(newPedido.getFecha());
@@ -213,10 +213,10 @@ public class PedidoController {
                     }else if (newPedido.getEstadoTexto().equals("ENTREGADO")){
                         pedido.setEstado(1);
                     }
-
-                    return new ResponseEntity<>(repository.save(pedido), HttpStatus.OK);
+                    PedidoDTO pedidoDTO = PedidoMapper.getPedidoDTO(repository.save(pedido), getProductosDTO(pedido.getProductos()));
+                    return new ResponseEntity<>(pedidoDTO, HttpStatus.OK);
                 })
-                .orElseGet(() -> new ResponseEntity<>(repository.save(new Pedido()), HttpStatus.CREATED));
+                .orElseGet(() -> new ResponseEntity<>(new PedidoDTO(), HttpStatus.CREATED));
     }
 
     @PostMapping("/pdf")
