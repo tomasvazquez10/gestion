@@ -188,7 +188,7 @@ public class ReporteController {
     }
 
     @PostMapping("/pedidos/pdf")
-    public ResponseEntity<InputStreamResource> getPedidosPDF(@RequestBody List<PedidoDTO> pedidos){
+    public ResponseEntity<InputStreamResource> getPedidosPDF(@RequestBody List<PedidoDTO> pedidos)  {
 
         ByteArrayInputStream bis = GeneratePDFReport.getPedidosPDF(pedidos);
 
