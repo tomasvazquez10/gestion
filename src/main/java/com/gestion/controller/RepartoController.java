@@ -71,7 +71,7 @@ public class RepartoController {
         try {
             List<Reparto> repartos = repository.findAll(Sort.by(Sort.Direction.ASC,"nroReparto")).stream()
                     .filter(Reparto::isActivo)
-                    .collect(Collectors.toList());;
+                    .collect(Collectors.toList());
             if (repartos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }

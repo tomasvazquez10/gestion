@@ -50,11 +50,11 @@ public class ClienteController {
     }
 
     @RequestMapping("/dni/{dni}")
-    public ResponseEntity<Cliente> getClienteByDni(@PathVariable String dni) {
+    public ResponseEntity<ClienteDTO> getClienteByDni(@PathVariable String dni) {
 
         Optional<Cliente> optCliente = repository.findClienteByDni(dni);
         if (optCliente.isPresent()){
-            return new ResponseEntity<>(optCliente.get(),HttpStatus.OK);
+            return new ResponseEntity<>(ClienteMapper.getClienteDTO(optCliente.get()),HttpStatus.OK);
         }else{
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -115,7 +115,9 @@ public class ClienteController {
     @RequestMapping("/all")
     public ResponseEntity<List<ClienteDTO>> getClientes(){
         try {
-            List<ClienteDTO> clientes = getClientesDTO(repository.findAll());
+            List<ClienteDTO> clientes = getClientesDTO(repository.findAll().stream()
+                    .filter(Cliente::isActivo).collect(Collectors.toList()
+                    ));
 
             if (clientes.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);

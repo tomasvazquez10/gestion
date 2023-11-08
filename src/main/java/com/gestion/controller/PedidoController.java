@@ -140,7 +140,7 @@ public class PedidoController {
     }
 
     @PostMapping()
-    public ResponseEntity<Pedido> crearPedido(@RequestBody PedidoDTO pedidoDTO) {
+    public ResponseEntity<PedidoDTO> crearPedido(@RequestBody PedidoDTO pedidoDTO) {
         try {
 
             if(pedidoDTO.getFecha() == null || pedidoDTO.getDniCliente() == null){
@@ -167,7 +167,7 @@ public class PedidoController {
             nuevoPedido.setProductos(nuevosProds);
             repository.save(nuevoPedido);
 
-            return new ResponseEntity<>(new Pedido(), HttpStatus.CREATED);
+            return new ResponseEntity<>(PedidoMapper.getPedidoDTO(nuevoPedido, getProductosDTO(nuevoPedido.getProductos())), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -1,7 +1,6 @@
 package com.gestion.util.mappers;
 
 import com.gestion.dto.ClienteDTO;
-import com.gestion.dto.CuentaDTO;
 import com.gestion.model.Cliente;
 
 public class ClienteMapper {

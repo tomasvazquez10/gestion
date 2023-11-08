@@ -38,6 +38,7 @@ public class ArticuloMapper {
         articuloDTO.setNombre(articulo.getNombre());
         articuloDTO.setDescripcion(articulo.getDescripcion());
         articuloDTO.setProveedor(articulo.getProveedor());
+        articuloDTO.setCuitProveedor(articulo.getProveedor().getCuit());
         articuloDTO.setStock(articulo.getStock());
         articuloDTO.setVentasTotales(ventasTotales);
         articuloDTO.setNroArticulo(articulo.getNroArticulo());
