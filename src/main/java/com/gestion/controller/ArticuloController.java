@@ -54,11 +54,11 @@ public class ArticuloController {
     }
 
     @RequestMapping("/numero/{nroArticulo}")
-    public ResponseEntity<Articulo> getArticuloByNroArticulo(@PathVariable Long nroArticulo) {
+    public ResponseEntity<ArticuloDTO> getArticuloByNroArticulo(@PathVariable Long nroArticulo) {
 
         Optional<Articulo> optionalArticulo = repository.findArticuloByNroArticulo(nroArticulo);
         if (optionalArticulo.isPresent()){
-            return new ResponseEntity<>(optionalArticulo.get(), HttpStatus.OK);
+            return new ResponseEntity<>(ArticuloMapper.getArticuloDTO(optionalArticulo.get()), HttpStatus.OK);
         }else{
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -115,7 +115,7 @@ public class ArticuloController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<Articulo> editArticulo(@RequestBody ArticuloDTO newArticulo) {
+    public ResponseEntity<ArticuloDTO> editArticulo(@RequestBody ArticuloDTO newArticulo) {
         Optional<Proveedor> optionalProveedor = proveedorRepository.findProveedorByCuit(newArticulo.getCuitProveedor());
         return repository.findById(newArticulo.getId())
                 .map(articulo -> {
@@ -125,9 +125,9 @@ public class ArticuloController {
                     articulo.setStock(newArticulo.getStock());
                     articulo.setNroArticulo(newArticulo.getNroArticulo());
                     articulo.setActivo(true);
-                    return new ResponseEntity<>(repository.save(articulo), HttpStatus.OK);
+                    return new ResponseEntity<>(ArticuloMapper.getArticuloDTO(repository.save(articulo)), HttpStatus.OK);
                 })
-                .orElseGet(() -> new ResponseEntity<>(repository.save(ArticuloMapper.getArticulo(newArticulo)), HttpStatus.CREATED));
+                .orElseGet(() -> new ResponseEntity<>(ArticuloMapper.getArticuloDTO(repository.save(ArticuloMapper.getArticulo(newArticulo))), HttpStatus.CREATED));
     }
 
     @RequestMapping("/buscar/{campo}/{value}")

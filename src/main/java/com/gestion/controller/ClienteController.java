@@ -130,7 +130,7 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> updateCliente(@PathVariable("id") Long id, @RequestBody Cliente newCliente){
+    public ResponseEntity<ClienteDTO> updateCliente(@PathVariable("id") Long id, @RequestBody Cliente newCliente){
 
         return repository.findById(id)
                 .map(cliente -> {
@@ -141,7 +141,7 @@ public class ClienteController {
                     cliente.setTelefono(newCliente.getTelefono());
                     cliente.setReparto(newCliente.getReparto());
                     cliente.setDni(newCliente.getDni());
-                    return new ResponseEntity<>(repository.save(cliente), HttpStatus.CREATED);
+                    return new ResponseEntity<>(ClienteMapper.getClienteDTO(repository.save(cliente)), HttpStatus.CREATED);
                 })
                 .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR));
     }
@@ -159,7 +159,8 @@ public class ClienteController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<Cliente> editCliente(@RequestBody Cliente newCliente) {
+    public ResponseEntity<ClienteDTO> editCliente(@RequestBody ClienteDTO newCliente) {
+        List<Reparto> repartos = repartoRepository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(newCliente.getNroReparto());
         return repository.findById(newCliente.getId())
                 .map(proveedor -> {
                     proveedor.setNombre(newCliente.getNombre());
@@ -168,10 +169,10 @@ public class ClienteController {
                     proveedor.setEmail(newCliente.getEmail());
                     proveedor.setTelefono(newCliente.getTelefono());
                     proveedor.setDni(newCliente.getDni());
-                    proveedor.setReparto(newCliente.getReparto());
-                    return new ResponseEntity<>(repository.save(proveedor), HttpStatus.OK);
+                    proveedor.setReparto(repartos.get(0));
+                    return new ResponseEntity<>(ClienteMapper.getClienteDTO(repository.save(proveedor)), HttpStatus.OK);
                 })
-                .orElseGet(() -> new ResponseEntity<>(repository.save(newCliente), HttpStatus.CREATED));
+                .orElseGet(() -> new ResponseEntity<>(new ClienteDTO(), HttpStatus.CREATED));
     }
 
     @PostMapping("/pdf")
