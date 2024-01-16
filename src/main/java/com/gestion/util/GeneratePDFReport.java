@@ -302,7 +302,7 @@ public class GeneratePDFReport {
             table.addCell(hcell);
 
             PdfPCell cell;
-            cell = new PdfPCell(new Phrase(pedido.getId().toString()));
+            cell = new PdfPCell(new Phrase(pedido.getIdPedido().toString()));
             cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(cell);

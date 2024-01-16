@@ -14,11 +14,11 @@ public class PedidoProductoPK implements Serializable {
 
     @JsonBackReference
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "pedido_id")
+    @JoinColumn(name = "idPedido")
     private Pedido pedido;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "articulo_id")
+    @JoinColumn(name = "idArticulo")
     private Articulo articulo;
 
     public Pedido getPedido() {

@@ -6,7 +6,6 @@ import com.gestion.dto.GastoDTO;
 import com.gestion.model.*;
 import com.gestion.repository.*;
 import com.gestion.util.mappers.CompraMapper;
-import com.gestion.util.mappers.CuentaMapper;
 import com.gestion.util.mappers.GastoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -118,7 +117,7 @@ public class CuentaController {
            List<CuentaDTO> cuentas = new ArrayList<>();
            List<Cliente> clientes = clienteRepository.findAll();
            for (Cliente cliente : clientes){
-               cuentas.add(new CuentaDTO(cliente.getId(), cliente.getId(), cliente.getSaldo(), cliente.getDni()));
+               cuentas.add(new CuentaDTO(cliente.getIdCliente(), cliente.getIdCliente(), cliente.getSaldo(), cliente.getDni()));
            }
            List<Proveedor> proveedores = proveedorRepository.findAll();
            for (Proveedor proveedor : proveedores){

@@ -69,9 +69,11 @@ public class RepartoController {
     @RequestMapping("/all")
     public ResponseEntity<List<Reparto>> getRepartos(){
         try {
-            List<Reparto> repartos = repository.findAll(Sort.by(Sort.Direction.ASC,"nroReparto")).stream()
+            List<Reparto> repartos = repository.findAllByActivoTrueOrderByNroRepartoAscDiaSemanaAsc();
+                    /*repository.findAll(Sort.by(Sort.Direction.ASC,"nroReparto")).stream()
                     .filter(Reparto::isActivo)
                     .collect(Collectors.toList());
+                     */
             if (repartos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -111,9 +113,7 @@ public class RepartoController {
             List<Reparto> repartos = repository.findAllByNroRepartoAndActivoTrueOrderByNroReparto(nroReparto);
 
             for (Reparto reparto : repartos){
-                if (diasSemana.contains(reparto.getDiaSemana())){
-                    diasSemana.remove(reparto.getDiaSemana());
-                }
+                diasSemana.remove(reparto.getDiaSemana());
             }
             if (repartos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -151,7 +151,7 @@ public class RepartoController {
 
     @PostMapping("/edit")
     public ResponseEntity<Reparto> editReparto(@RequestBody Reparto newReparto) {
-        return repository.findById(newReparto.getId())
+        return repository.findById(newReparto.getIdReparto())
                 .map(reparto -> {
                     reparto.setNroReparto(newReparto.getNroReparto());
                     reparto.setDiaSemana(newReparto.getDiaSemana());

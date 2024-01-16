@@ -12,11 +12,16 @@ public class Compra {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    private Long idCompra;
 
     @ManyToOne()
-    @JoinColumn(name = "articulo_id", nullable = false)
+    @JoinColumn(name = "idArticulo", nullable = false)
     private Articulo articulo;
+
+    @ManyToOne()
+    @JoinColumn(name = "idProveedor", nullable = false)
+    private Proveedor proveedor;
+
     @Column
     private Date fecha;
     @Column
@@ -24,16 +29,28 @@ public class Compra {
     @Column
     private int cantidad;
     @Column
+    private boolean pago;
+    @Column
     private boolean activo;
 
     public Compra() {}
 
-    public Compra(Articulo articulo, Date fecha, double precioUnidad, int cantidad, boolean activo) {
+    public Compra(Articulo articulo, Proveedor proveedor, Date fecha, double precioUnidad, int cantidad, boolean pago, boolean activo) {
         this.articulo = articulo;
+        this.proveedor = proveedor;
         this.fecha = fecha;
         this.precioUnidad = precioUnidad;
         this.cantidad = cantidad;
+        this.pago = pago;
         this.activo = activo;
+    }
+
+    public Proveedor getProveedor() {
+        return proveedor;
+    }
+
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
     }
 
     public boolean isActivo() {
@@ -44,12 +61,12 @@ public class Compra {
         this.activo = activo;
     }
 
-    public Long getId() {
-        return id;
+    public Long getIdCompra() {
+        return idCompra;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdCompra(Long idCompra) {
+        this.idCompra = idCompra;
     }
 
     public Articulo getArticulo() {
@@ -84,4 +101,11 @@ public class Compra {
         this.cantidad = cantidad;
     }
 
+    public boolean isPago() {
+        return pago;
+    }
+
+    public void setPago(boolean pago) {
+        this.pago = pago;
+    }
 }

@@ -12,7 +12,7 @@ public class GastoMapper {
     public static List<GastoDTO> getGastoDTOList(List<Pedido> pedidos){
         List<GastoDTO> gastoDTOList = new ArrayList<>();
         gastoDTOList = pedidos.stream().map( pedido -> {
-            return new GastoDTO(pedido.getId(),pedido.getPrecioTotal(),pedido.getFecha());
+            return new GastoDTO(pedido.getIdPedido(),pedido.getPrecioTotal(),pedido.getFecha());
         }).collect(Collectors.toList());
         return gastoDTOList;
     }

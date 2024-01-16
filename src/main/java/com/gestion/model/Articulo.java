@@ -12,14 +12,14 @@ public class Articulo implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    private Long idArticulo;
     @Column
     private String nombre;
     @Column
     private String descripcion;
 
     @ManyToOne()
-    @JoinColumn(name = "proveedor_id", nullable = false)
+    @JoinColumn(name = "idProveedor", nullable = false)
     private Proveedor proveedor;
     @Column
     private int stock;
@@ -78,11 +78,11 @@ public class Articulo implements Serializable {
     }
 
     public Long getId() {
-        return id;
+        return idArticulo;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.idArticulo = id;
     }
 
     public String getNombre() {
@@ -144,7 +144,7 @@ public class Articulo implements Serializable {
     @Override
     public String toString() {
         return "Articulo{" +
-                "id=" + id +
+                "id=" + idArticulo +
                 ", nombre='" + nombre + '\'' +
                 ", descripcion='" + descripcion + '\'' +
                 ", cuitProveedor='" + proveedor.getCuit() + '\'' +

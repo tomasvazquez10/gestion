@@ -1,8 +1,10 @@
 package com.gestion.controller;
 
+import com.gestion.dto.ClienteDTO;
 import com.gestion.dto.PagoDTO;
 import com.gestion.model.*;
 import com.gestion.repository.*;
+import com.gestion.util.mappers.ClienteMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

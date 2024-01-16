@@ -11,4 +11,5 @@ public interface RepartoRepository extends JpaRepository<Reparto, Long> {
 
     List<Reparto> findAllByNroRepartoAndActivoTrueOrderByNroReparto(int nroReparto);
     List<Reparto> findAllByDiaSemanaAndActivoTrue(String diaSemana);
+    List<Reparto> findAllByActivoTrueOrderByNroRepartoAscDiaSemanaAsc();
 }

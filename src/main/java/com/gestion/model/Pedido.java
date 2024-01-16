@@ -7,22 +7,21 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Entity
-@Table(name = "PEDIDO")
+@Table(name = "Detalle_Pedido")
 public class Pedido {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    private Long idPedido;
     @Column
     private Date fecha;
     @Column
     private int estado;
 
     @ManyToOne()
-    @JoinColumn(name = "cliente_id", nullable = false)
+    @JoinColumn(name = "idCliente", nullable = false)
     private Cliente cliente;
     @Column
     private Double precioTotal;
@@ -81,12 +80,12 @@ public class Pedido {
         this.pagos = pagos;
     }
 
-    public Long getId() {
-        return id;
+    public Long getIdPedido() {
+        return idPedido;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdPedido(Long idPedido) {
+        this.idPedido = idPedido;
     }
 
     public Date getFecha() {

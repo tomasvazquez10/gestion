@@ -11,7 +11,7 @@ public class Proveedor {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    private Long idProveedor;
     @Column
     private String cuit;
     @Column
@@ -32,6 +32,18 @@ public class Proveedor {
     @JsonIgnore
     @OneToMany(mappedBy = "proveedor")
     private Set<Articulo> articulos;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "proveedor")
+    private Set<Compra> compras;
+
+    public Set<Compra> getCompras() {
+        return compras;
+    }
+
+    public void setCompras(Set<Compra> compras) {
+        this.compras = compras;
+    }
 
     public Set<Articulo> getArticulos() {
         return articulos;
@@ -71,11 +83,11 @@ public class Proveedor {
     }
 
     public Long getId() {
-        return id;
+        return idProveedor;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.idProveedor = id;
     }
 
     public String getNombreFantasia() {
@@ -129,7 +141,7 @@ public class Proveedor {
     @Override
     public String toString() {
         return "Cliente{" +
-                "id=" + id +
+                "id=" + idProveedor +
                 ", cuit='" + cuit + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", nombreFantasia='" + nombreFantasia + '\'' +

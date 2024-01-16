@@ -12,7 +12,7 @@ public class Cliente {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    private Long idCliente;
     @Column
     private String dni;
     @Column
@@ -69,12 +69,12 @@ public class Cliente {
         this.nombre = nombre;
     }
 
-    public Long getId() {
-        return id;
+    public Long getIdCliente() {
+        return idCliente;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdCliente(Long id) {
+        this.idCliente = id;
     }
 
     public String getNombreFantasia() {
@@ -136,7 +136,7 @@ public class Cliente {
     @Override
     public String toString() {
         return "Cliente{" +
-                "id=" + id +
+                "id=" + idCliente +
                 ", dni='" + dni + '\'' +
                 ", nombre='" + nombre + '\'' +
                 ", nombreFantasia='" + nombreFantasia + '\'' +

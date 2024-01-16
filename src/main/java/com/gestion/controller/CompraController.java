@@ -1,11 +1,13 @@
 package com.gestion.controller;
 
+import com.gestion.dto.CompraDTO;
 import com.gestion.model.Articulo;
 import com.gestion.model.Compra;
 import com.gestion.model.Proveedor;
 import com.gestion.repository.ArticuloRepository;
 import com.gestion.repository.CompraRepository;
 import com.gestion.repository.ProveedorRepository;
+import com.gestion.util.mappers.ArticuloMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -100,7 +102,7 @@ public class CompraController {
 
     @PostMapping("/edit")
     public ResponseEntity<Compra> editCompra(@RequestBody Compra newCompra) {
-        return repository.findById(newCompra.getId())
+        return repository.findById(newCompra.getIdCompra())
                 .map(compra -> {
                     compra.setArticulo(newCompra.getArticulo());
                     compra.setCantidad(newCompra.getCantidad());
@@ -113,11 +115,12 @@ public class CompraController {
     }
 
     @PostMapping()
-    public ResponseEntity<Compra> crearCompra(@RequestBody Compra compra) {
+    public ResponseEntity<Compra> crearCompra(@RequestBody CompraDTO compra) {
         try {
-            Articulo articulo = compra.getArticulo();
+            Articulo articulo = ArticuloMapper.getArticulo(compra.getArticulo());
+            Proveedor proveedor = proveedorRepository.findProveedorByCuit(compra.getCuitProveedor()).get();
             Compra nuevaCompra = repository
-                    .save(new Compra(articulo, compra.getFecha(),compra.getPrecioUnidad(),compra.getCantidad(),true));
+                    .save(new Compra(articulo, proveedor, compra.getFecha(),compra.getPrecioUnidad(),compra.getCantidad(),false,true));
 
             //sumo la cantidad al stock de articulo
             articulo.setStock(articulo.getStock() + compra.getCantidad());
@@ -126,7 +129,7 @@ public class CompraController {
             nuevaCompra.setArticulo(articulo);
 
             //sumo total al saldo de proveedor
-            Proveedor proveedor = articulo.getProveedor();
+            //Proveedor proveedor = articulo.getProveedor();
             proveedor.setSaldo(proveedor.getSaldo() + compra.getCantidad()* compra.getPrecioUnidad());
             proveedorRepository.save(proveedor);
 

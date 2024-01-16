@@ -7,7 +7,7 @@ public class ClienteMapper {
 
     public static ClienteDTO getClienteDTO(Cliente cliente){
         ClienteDTO clienteDTO = new ClienteDTO();
-        clienteDTO.setId(cliente.getId());
+        clienteDTO.setId(cliente.getIdCliente());
         clienteDTO.setNombre(cliente.getNombre());
         clienteDTO.setNombreFantasia(cliente.getNombreFantasia());
         clienteDTO.setEmail(cliente.getEmail());

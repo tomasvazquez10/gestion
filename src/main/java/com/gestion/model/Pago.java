@@ -11,7 +11,7 @@ public class Pago {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    private Long idPago;
     @Column
     private Double monto;
     @Column
@@ -23,7 +23,7 @@ public class Pago {
 
     @JsonIgnore
     @ManyToOne()
-    @JoinColumn(name = "pedido_id")
+    @JoinColumn(name = "idPedido")
     private Pedido pedido;
 
     public Pago(){};
@@ -36,12 +36,12 @@ public class Pago {
         this.pedido = pedido;
     }
 
-    public Long getId() {
-        return id;
+    public Long getIdPago() {
+        return idPago;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdPago(Long idPago) {
+        this.idPago = idPago;
     }
 
     public Pedido getPedido() {

@@ -11,7 +11,7 @@ public class Reparto {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    private Long idReparto;
     @Column
     private int nroReparto;
     @Column
@@ -42,12 +42,12 @@ public class Reparto {
         this.clientes = clientes;
     }
 
-    public Long getId() {
-        return id;
+    public Long getIdReparto() {
+        return idReparto;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdReparto(Long idReparto) {
+        this.idReparto = idReparto;
     }
 
     public int getNroReparto() {
@@ -85,7 +85,7 @@ public class Reparto {
     @Override
     public String toString() {
         return "Reparto{" +
-                "id=" + id +
+                "id=" + idReparto +
                 ", nroReparto=" + nroReparto +
                 ", diaSemana='" + diaSemana + '\'' +
                 '}';

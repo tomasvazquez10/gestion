@@ -16,6 +16,7 @@ public class CompraDTO {
     private double precioUnidad;
     private int cantidad;
     private boolean activo;
+    private String cuitProveedor;
 
     public CompraDTO() {
     }
@@ -66,5 +67,13 @@ public class CompraDTO {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public String getCuitProveedor() {
+        return cuitProveedor;
+    }
+
+    public void setCuitProveedor(String cuitProveedor) {
+        this.cuitProveedor = cuitProveedor;
     }
 }

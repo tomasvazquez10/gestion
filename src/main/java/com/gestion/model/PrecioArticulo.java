@@ -9,10 +9,10 @@ public class PrecioArticulo {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    private Long idPrecioArticulo;
 
     @ManyToOne()
-    @JoinColumn(name = "articulo_id", nullable = false)
+    @JoinColumn(name = "idArticulo", nullable = false)
     private Articulo articulo;
     @Column
     private Date fecha;
@@ -32,11 +32,11 @@ public class PrecioArticulo {
     }
 
     public Long getId() {
-        return id;
+        return idPrecioArticulo;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.idPrecioArticulo = id;
     }
 
     public Articulo getArticulo() {
@@ -74,7 +74,7 @@ public class PrecioArticulo {
     @Override
     public String toString() {
         return "PrecioArticulo{" +
-                "id=" + id +
+                "id=" + idPrecioArticulo +
                 ", idArticulo=" + articulo.getId() +
                 ", fecha=" + fecha +
                 ", precio=" + precio +
