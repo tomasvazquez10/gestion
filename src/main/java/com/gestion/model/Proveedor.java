@@ -26,8 +26,10 @@ public class Proveedor {
     private String telefono;
     @Column
     private boolean activo;
-    @Column
+    /*
+    Column
     private double saldo;
+     */
 
     @JsonIgnore
     @OneToMany(mappedBy = "proveedor")
@@ -63,7 +65,7 @@ public class Proveedor {
         this.direccion = direccion;
         this.telefono = telefono;
         this.activo = true;
-        this.saldo = 0;
+        //this.saldo = 0;
     }
 
     public String getCuit() {
@@ -129,7 +131,7 @@ public class Proveedor {
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
-
+/*
     public double getSaldo() {
         return saldo;
     }
@@ -137,7 +139,7 @@ public class Proveedor {
     public void setSaldo(double saldo) {
         this.saldo = saldo;
     }
-
+*/
     @Override
     public String toString() {
         return "Cliente{" +

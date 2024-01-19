@@ -1,7 +1,11 @@
 package com.gestion.controller;
 
+import com.gestion.dto.ProveedorDTO;
+import com.gestion.model.Compra;
 import com.gestion.model.Proveedor;
+import com.gestion.repository.CompraRepository;
 import com.gestion.repository.ProveedorRepository;
+import com.gestion.util.mappers.ProveedorMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,19 +22,22 @@ import java.util.stream.Collectors;
 public class ProveedorController {
 
     private final ProveedorRepository repository;
+    private final CompraRepository compraRepository;
 
     @Autowired
-    public ProveedorController(ProveedorRepository repository) {
+    public ProveedorController(ProveedorRepository repository, CompraRepository compraRepository) {
         this.repository = repository;
+        this.compraRepository = compraRepository;
     }
 
 
     @RequestMapping("/{id}")
-    public ResponseEntity<Proveedor> getProveedor(@PathVariable Long id) {
+    public ResponseEntity<ProveedorDTO> getProveedor(@PathVariable Long id) {
 
         Optional<Proveedor> optionalProveedor = repository.findById(id);
         if (optionalProveedor.isPresent()){
-            return new ResponseEntity<>(optionalProveedor.get(), HttpStatus.OK);
+            Proveedor proveedor = optionalProveedor.get();
+            return new ResponseEntity<>(ProveedorMapper.getProveedorDTO(proveedor,getSaldoProveedor(proveedor)), HttpStatus.OK);
         }else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -148,5 +155,15 @@ public class ProveedorController {
         } catch (Exception e) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    private double getSaldoProveedor(Proveedor proveedor){
+        List<Compra> compras = compraRepository.findAllByProveedorAndActivoTrueAndPagoFalse(proveedor);
+        if (compras.isEmpty()){
+            return 0;
+        }
+        return compras.stream()
+                .mapToDouble(compra -> compra.getPrecioUnidad() * compra.getCantidad())
+                .sum();
     }
 }

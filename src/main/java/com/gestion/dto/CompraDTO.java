@@ -1,32 +1,27 @@
 package com.gestion.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.gestion.model.Articulo;
-
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import java.util.Date;
 
 public class CompraDTO {
 
-    private Long id;
+    private Long idCompra;
     private ArticuloDTO articulo;
     private Date fecha;
     private double precioUnidad;
     private int cantidad;
     private boolean activo;
     private String cuitProveedor;
+    private boolean pago;
 
     public CompraDTO() {
     }
 
-    public Long getId() {
-        return id;
+    public Long getIdCompra() {
+        return idCompra;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdCompra(Long idCompra) {
+        this.idCompra = idCompra;
     }
 
     public ArticuloDTO getArticulo() {
@@ -75,5 +70,13 @@ public class CompraDTO {
 
     public void setCuitProveedor(String cuitProveedor) {
         this.cuitProveedor = cuitProveedor;
+    }
+
+    public boolean isPago() {
+        return pago;
+    }
+
+    public void setPago(boolean pago) {
+        this.pago = pago;
     }
 }

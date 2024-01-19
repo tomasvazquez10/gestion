@@ -7,12 +7,13 @@ public class CompraMapper {
 
     public static CompraDTO getCompraDTO(Compra compra){
         CompraDTO compraDTO = new CompraDTO();
-        compraDTO.setId(compra.getIdCompra());
+        compraDTO.setIdCompra(compra.getIdCompra());
         compraDTO.setArticulo(ArticuloMapper.getArticuloDTOSimple(compra.getArticulo()));
         compraDTO.setFecha(compra.getFecha());
         compraDTO.setPrecioUnidad(compra.getPrecioUnidad());
         compraDTO.setCantidad(compra.getCantidad());
         compraDTO.setActivo(compra.isActivo());
+        compraDTO.setPago(compra.isPago());
 
         return compraDTO;
     }

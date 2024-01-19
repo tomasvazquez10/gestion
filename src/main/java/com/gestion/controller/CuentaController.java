@@ -71,7 +71,7 @@ public class CuentaController {
                 }
             }
             cuentaDTO.setCompras(compras);
-            cuentaDTO.setSaldo(optionalProveedor.get().getSaldo());
+            cuentaDTO.setSaldo(getSaldoProveedor(optionalProveedor.get()));
         }
         return new ResponseEntity<>(cuentaDTO, HttpStatus.OK);
     }
@@ -121,7 +121,7 @@ public class CuentaController {
            }
            List<Proveedor> proveedores = proveedorRepository.findAll();
            for (Proveedor proveedor : proveedores){
-               cuentas.add(new CuentaDTO(proveedor.getId(), proveedor.getId(), proveedor.getSaldo(), proveedor.getCuit()));
+               cuentas.add(new CuentaDTO(proveedor.getId(), proveedor.getId(), getSaldoProveedor(proveedor), proveedor.getCuit()));
            }
             if (cuentas.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -158,4 +158,14 @@ public class CuentaController {
                 .orElseGet(() -> new ResponseEntity<>(repository.save(newCuenta), HttpStatus.CREATED));
     }
     */
+
+    private double getSaldoProveedor(Proveedor proveedor){
+        List<Compra> compras = compraRepository.findAllByProveedorAndActivoTrueAndPagoFalse(proveedor);
+        if (compras.isEmpty()){
+            return 0;
+        }
+        return compras.stream()
+                .mapToDouble(compra -> compra.getPrecioUnidad() * compra.getCantidad())
+                .sum();
+    }
 }

@@ -81,6 +81,25 @@ public class CompraController {
         }
     }
 
+    @RequestMapping("/proveedor/{idProveedor}")
+    public ResponseEntity<List<Compra>> getComprasByIdProveedor(@PathVariable Long idProveedor){
+        try {
+            Optional<Proveedor> optionalProveedor = proveedorRepository.findById(idProveedor);
+            if (optionalProveedor.isPresent()){
+                List<Compra> compras = repository.findAllByProveedorAndActivoTrueAndPagoFalse(optionalProveedor.get());
+
+                if (compras.isEmpty()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                return new ResponseEntity<>(compras, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.NO_CONTENT);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @RequestMapping("delete/{id}")
     public ResponseEntity deleteCompra(@PathVariable Long id){
 
@@ -96,6 +115,26 @@ public class CompraController {
                     articulo.setStock(articulo.getStock() - compra.getCantidad());
                     articuloRepository.save(articulo);
                     return new ResponseEntity(HttpStatus.OK);
+                })
+                .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
+    }
+
+    @RequestMapping("pagar/{id}")
+    public ResponseEntity pagarCompra(@PathVariable Long id){
+
+        return repository.findById(id)
+                .map(compra -> {
+                    compra.setPago(true);
+                    repository.save(compra);
+
+                    //chequeo restar saldo al proveedor
+                    Proveedor proveedor = compra.getProveedor();
+                    if (proveedor == null){
+                        return new ResponseEntity(HttpStatus.NO_CONTENT);
+                    }
+                    //proveedor.setSaldo(proveedor.getSaldo() - compra.getCantidad()* compra.getPrecioUnidad());
+                    //proveedorRepository.save(proveedor);
+                    return new ResponseEntity(compra,HttpStatus.OK);
                 })
                 .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
     }
@@ -129,8 +168,7 @@ public class CompraController {
             nuevaCompra.setArticulo(articulo);
 
             //sumo total al saldo de proveedor
-            //Proveedor proveedor = articulo.getProveedor();
-            proveedor.setSaldo(proveedor.getSaldo() + compra.getCantidad()* compra.getPrecioUnidad());
+            //proveedor.setSaldo(proveedor.getSaldo() + compra.getCantidad()* compra.getPrecioUnidad());
             proveedorRepository.save(proveedor);
 
             return new ResponseEntity<>(nuevaCompra, HttpStatus.CREATED);
