@@ -47,6 +47,7 @@ public class PrecioArticuloController {
                     .save(new PrecioArticulo(precioArticulo.getArticulo(),new Date(),precioArticulo.getPrecio()));
             Articulo nuevo = precioArticulo.getArticulo();
             nuevo.setPrecio(precioArticulo.getPrecio());
+            nuevo.setActivo(true);
             articuloRepository.save(nuevo);
             return new ResponseEntity<>(nuevoPrecioArticulo, HttpStatus.CREATED);
         } catch (Exception e) {
