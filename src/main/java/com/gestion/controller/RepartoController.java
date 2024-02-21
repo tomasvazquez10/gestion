@@ -151,7 +151,7 @@ public class RepartoController {
 
     @PostMapping("/edit")
     public ResponseEntity<Reparto> editReparto(@RequestBody Reparto newReparto) {
-        return repository.findById(newReparto.getIdReparto())
+        return repository.findById(newReparto.getId())
                 .map(reparto -> {
                     reparto.setNroReparto(newReparto.getNroReparto());
                     reparto.setDiaSemana(newReparto.getDiaSemana());

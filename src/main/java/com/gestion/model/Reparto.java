@@ -42,11 +42,11 @@ public class Reparto {
         this.clientes = clientes;
     }
 
-    public Long getIdReparto() {
+    public Long getId() {
         return idReparto;
     }
 
-    public void setIdReparto(Long idReparto) {
+    public void setId(Long idReparto) {
         this.idReparto = idReparto;
     }
 
