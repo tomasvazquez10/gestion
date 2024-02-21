@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface CompraRepository extends JpaRepository<Compra, Long> {
 
-    List<Compra> findAllByArticuloOrderByFechaDesc(Articulo articulo);
+    List<Compra> findAllByArticuloAndActivoTrueOrderByFechaDesc(Articulo articulo);
 
     List<Compra> findAllByProveedorAndActivoTrueOrderByFechaDesc(Proveedor proveedor);
     List<Compra> findAllByProveedorAndActivoTrueAndPagoFalse(Proveedor proveedor);

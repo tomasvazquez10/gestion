@@ -21,7 +21,7 @@ public class Pedido {
     private int estado;
 
     @ManyToOne()
-    @JoinColumn(name = "idCliente", nullable = false)
+    @JoinColumn(name = "id_cliente", nullable = true)
     private Cliente cliente;
     @Column
     private Double precioTotal;

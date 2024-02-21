@@ -65,7 +65,7 @@ public class CuentaController {
             cuentaDTO.setDniCliente(optionalProveedor.get().getCuit());
             List<CompraDTO> compras = new ArrayList<>();
             for (Articulo articulo : optionalProveedor.get().getArticulos()){
-                List<Compra> comprasArt = compraRepository.findAllByArticuloOrderByFechaDesc(articulo);
+                List<Compra> comprasArt = compraRepository.findAllByArticuloAndActivoTrueOrderByFechaDesc(articulo);
                 for (Compra compra : comprasArt){
                     compras.add(CompraMapper.getCompraDTO(compra));
                 }
@@ -117,7 +117,7 @@ public class CuentaController {
            List<CuentaDTO> cuentas = new ArrayList<>();
            List<Cliente> clientes = clienteRepository.findAll();
            for (Cliente cliente : clientes){
-               cuentas.add(new CuentaDTO(cliente.getIdCliente(), cliente.getIdCliente(), cliente.getSaldo(), cliente.getDni()));
+               cuentas.add(new CuentaDTO(cliente.getId(), cliente.getId(), cliente.getSaldo(), cliente.getDni()));
            }
            List<Proveedor> proveedores = proveedorRepository.findAll();
            for (Proveedor proveedor : proveedores){

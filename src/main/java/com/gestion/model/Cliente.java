@@ -69,11 +69,11 @@ public class Cliente {
         this.nombre = nombre;
     }
 
-    public Long getIdCliente() {
+    public Long getId() {
         return idCliente;
     }
 
-    public void setIdCliente(Long id) {
+    public void setId(Long id) {
         this.idCliente = id;
     }
 

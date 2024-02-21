@@ -65,7 +65,7 @@ public class CompraController {
         try {
             Optional<Articulo> optionalArticulo = articuloRepository.findById(idArticulo);
             if (optionalArticulo.isPresent()){
-                List<Compra> compras = repository.findAllByArticuloOrderByFechaDesc(optionalArticulo.get()).stream()
+                List<Compra> compras = repository.findAllByArticuloAndActivoTrueOrderByFechaDesc(optionalArticulo.get()).stream()
                         .filter(Compra::isActivo)
                         .collect(Collectors.toList());;
 
